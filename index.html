@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRS6 - Học Từ Vựng & Đấu Arena Online (150 Từ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366F1;
+            --cyber-cyan: #06B6D4;
+            --fire-red: #EF4444;
+            --fire-gold: #F59E0B;
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.88);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --accent: #10B981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background: #030712;
+            background-image:
+                radial-gradient(at 10% 10%, rgba(239, 68, 68, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(245, 158, 11, 0.12) 0px, transparent 50%);
+            color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border); padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .header-title {
+            font-size: 1.25rem; font-weight: 900;
+            background: linear-gradient(135deg, #EF4444, #F59E0B);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-audio-toggle {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: white;
+            padding: 8px 16px; border-radius: 20px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s;
+        }
+        .btn-audio-toggle:hover { background: rgba(99, 102, 241, 0.2); border-color: var(--primary); }
+
+        .main-container {
+            max-width: 1280px; margin: 1.8rem auto; padding: 0 1.5rem;
+            display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 1.8rem; width: 100%; flex: 1;
+        }
+
+        .sidebar {
+            background: var(--card-bg); backdrop-filter: blur(12px);
+            border-radius: 20px; padding: 1.5rem; border: 1px solid var(--card-border);
+            display: flex; flex-direction: column; gap: 1.2rem; height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .btn-session {
+            background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); color: var(--text-muted);
+            padding: 12px 16px; border-radius: 12px; cursor: pointer; text-align: left; width: 100%;
+            margin-top: 6px; font-size: 0.88rem; font-weight: 600; transition: all 0.3s;
+        }
+        .btn-session:hover { border-color: var(--fire-gold); color: #FFF; transform: translateX(5px); }
+        .btn-session.active { border-color: var(--fire-gold); color: #FFF; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.15)); font-weight: 800; box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+
+        .content-area { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+
+        .step-stepper {
+            display: flex; background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 6px; gap: 6px; backdrop-filter: blur(12px); flex-wrap: wrap;
+        }
+        .step-pill {
+            flex: 1; min-width: 120px; text-align: center; padding: 12px 8px; font-size: 0.85rem; font-weight: 700;
+            border-radius: 12px; color: var(--text-muted); background: transparent; border: none; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .step-pill.active { background: linear-gradient(135deg, var(--fire-red), var(--fire-gold)); color: #FFF; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+        .step-pill.completed { color: var(--accent); background: rgba(16, 185, 129, 0.1); }
+
+        .panel-box {
+            background: var(--card-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border); border-radius: 24px;
+            padding: 2.5rem; display: flex; flex-direction: column; gap: 1.8rem; min-height: 520px;
+            justify-content: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        /* FLASHCARD */
+        .flip-card-container { perspective: 1000px; width: 100%; max-width: 500px; height: 260px; margin: 0 auto; cursor: pointer; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .flip-card-container.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 20px; border: 2px solid var(--card-border); padding: 2rem;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;
+            background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .flip-card-back { transform: rotateY(180deg); border-color: var(--cyber-cyan); background: radial-gradient(circle at center, rgba(6, 182, 212, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%); }
+
+        .word-title {
+            font-size: 3rem; font-weight: 900; text-align: center;
+            background: linear-gradient(135deg, #FFFFFF 30%, #A5B4FC 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .meaning-title { font-size: 1.8rem; font-weight: 800; color: var(--cyber-cyan); text-shadow: 0 0 15px rgba(6, 182, 212, 0.4); text-align: center; }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--fire-red), var(--fire-gold)); color: white; border: none; padding: 14px 28px;
+            border-radius: 14px; font-weight: 800; font-size: 0.95rem; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 10px; justify-content: center; transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+        }
+        .btn-action:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6); }
+        .btn-ghost { background: rgba(255,255,255,0.1); border: 1px solid var(--card-border); box-shadow: none; }
+
+        .feedback-banner {
+            padding: 16px 24px; border-radius: 14px; font-weight: 800; display: none; align-items: center; gap: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .banner-taunt { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #FCA5A5; }
+        .banner-praise { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6EE7B7; }
+
+        .write-input {
+            width: 100%; background: rgba(3, 7, 18, 0.8); border: 2px solid var(--card-border);
+            border-radius: 14px; padding: 16px 22px; color: white; font-size: 1.25rem; font-weight: 600; outline: none; transition: all 0.3s;
+        }
+        .write-input:focus { border-color: var(--fire-gold); box-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
+
+        .quiz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .quiz-opt {
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); color: white; padding: 1.4rem;
+            border-radius: 16px; cursor: pointer; text-align: left; font-size: 1.1rem; font-weight: 700; transition: all 0.25s;
+        }
+        .quiz-opt:hover { border-color: var(--fire-gold); background: rgba(245, 158, 11, 0.12); transform: translateY(-3px); }
+
+        /* ================= ARENA ONLINE ================= */
+        #panel-5 { padding: 1.5rem; justify-content: flex-start; }
+        .arena-screen { display: none; flex-direction: column; gap: 1.2rem; align-items: center; justify-content: center; width: 100%; }
+        #arenaRace, #arenaQuiz { align-items: stretch; gap: 1rem; }
+
+        .arena-hero { text-align: center; }
+        .arena-hero-icon { font-size: 3.2rem; filter: drop-shadow(0 0 18px rgba(245, 158, 11, 0.6)); }
+        .arena-hero h2 { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #fff, #FCD34D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .arena-hero p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+
+        .arena-box {
+            background: rgba(17, 24, 39, 0.92); border: 2px solid var(--fire-gold); border-radius: 24px; padding: 2rem;
+            width: 100%; max-width: 680px; text-align: center; box-shadow: 0 0 40px rgba(245, 158, 11, 0.22);
+        }
+        .field-label { display: block; text-align: left; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+        .text-input {
+            width: 100%; background: rgba(3, 7, 18, 0.8); border: 2px solid var(--card-border);
+            border-radius: 14px; padding: 14px 18px; color: white; font-size: 1.1rem; font-weight: 600; outline: none; text-align: center;
+        }
+        .text-input:focus { border-color: var(--fire-gold); }
+        .code-input { letter-spacing: 0.35em; font-weight: 900; text-transform: uppercase; }
+        .btn-full { width: 100%; }
+        .btn-sm { padding: 9px 16px; font-size: 0.82rem; border-radius: 10px; }
+        .btn-mini { background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: var(--text-muted); padding: 7px 14px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+        .btn-mini:hover { color: #fff; border-color: var(--fire-red); }
+        .btn-action:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 1.2rem 0; }
+        .menu-card { background: rgba(15, 23, 42, 0.85); border: 1px solid var(--card-border); border-radius: 18px; padding: 1.2rem; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        .menu-card h3 { font-size: 1.05rem; font-weight: 900; }
+        .menu-card p { font-size: 0.82rem; color: var(--text-muted); flex: 1; }
+        .menu-status { margin-top: 1rem; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.35); color: #67E8F9; display: none; }
+        .menu-status.err { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.4); color: #FCA5A5; }
+
+        /* LOBBY */
+        .lobby-wrap { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1.2rem; align-items: start; }
+        .lobby-card { background: rgba(17, 24, 39, 0.92); border: 1px solid var(--card-border); border-radius: 22px; padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+        .code-card { text-align: center; border: 2px solid var(--fire-gold); box-shadow: 0 0 40px rgba(245, 158, 11, 0.2); align-items: center; }
+        .code-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.15em; color: var(--text-muted); }
+        .code-value { font-size: 3rem; font-weight: 900; letter-spacing: 0.3em; padding-left: 0.3em; background: linear-gradient(135deg, #FDE68A, #F59E0B, #EF4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.1; }
+        .code-hint { font-size: 0.82rem; color: var(--text-muted); }
+        .section-title { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+        .section-title b { color: var(--fire-gold); }
+        .players-list { display: flex; flex-direction: column; gap: 8px; max-height: 330px; overflow-y: auto; padding-right: 4px; }
+        .player-card { display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--card-border); border-radius: 14px; padding: 10px 14px; }
+        .player-card.is-me { border-color: var(--fire-gold); background: rgba(245, 158, 11, 0.08); }
+        .pc-emoji { font-size: 1.9rem; }
+        .pc-info { flex: 1; min-width: 0; text-align: left; }
+        .pc-name { font-weight: 800; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pc-tags { display: flex; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+        .tag { font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+        .tag-host { background: rgba(245, 158, 11, 0.18); color: #FCD34D; }
+        .tag-bot { background: rgba(99, 102, 241, 0.2); color: #A5B4FC; }
+        .tag-ok { background: rgba(16, 185, 129, 0.15); color: #6EE7B7; }
+        .pc-kick { background: rgba(239, 68, 68, 0.15); border: none; color: #FCA5A5; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: 900; }
+        .pc-kick:hover { background: var(--fire-red); color: #fff; }
+
+        .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mode-card { background: rgba(15, 23, 42, 0.9); border: 2px solid var(--card-border); border-radius: 18px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.25s; }
+        .mode-card:hover:not(.locked) { transform: translateY(-3px); border-color: rgba(245, 158, 11, 0.6); }
+        .mode-card.active { border-color: var(--fire-gold); background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.12)); box-shadow: 0 0 24px rgba(245, 158, 11, 0.25); }
+        .mode-card.locked { cursor: default; }
+        .mode-card .mc-ico { font-size: 2rem; }
+        .mode-card .mc-name { font-weight: 900; font-size: 1.05rem; margin: 4px 0; }
+        .mode-card .mc-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; }
+        .opt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .opt-row select { width: 100%; background: rgba(3, 7, 18, 0.85); color: #fff; border: 2px solid var(--card-border); border-radius: 12px; padding: 11px 12px; font-weight: 700; font-size: 0.9rem; outline: none; margin-top: 6px; }
+        .opt-row select:disabled { opacity: 0.7; }
+        .opt-row select:focus { border-color: var(--fire-gold); }
+
+        .pet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .pet-card { background: rgba(15, 23, 42, 0.8); border: 2px solid var(--card-border); border-radius: 12px; padding: 8px 4px; cursor: pointer; transition: all 0.2s; position: relative; text-align: center; }
+        .pet-card:hover:not(.taken), .pet-card.selected { border-color: var(--fire-gold); background: rgba(245, 158, 11, 0.15); transform: translateY(-2px); }
+        .pet-card.taken { opacity: 0.35; cursor: not-allowed; }
+        .pet-card .pe { font-size: 1.7rem; }
+        .pet-card .pn { font-size: 0.62rem; font-weight: 700; margin-top: 2px; }
+        .start-hint { font-size: 0.8rem; color: #FCA5A5; font-weight: 700; text-align: center; min-height: 1em; }
+        .wait-note { text-align: center; color: var(--fire-gold); font-weight: 800; padding: 10px; }
+
+        /* GAME / QUIZ SCREENS */
+        .game-canvas-container {
+            position: relative; width: 100%; aspect-ratio: 1000 / 350; background: linear-gradient(to bottom, #1e1b4b 0%, #0f172a 70%, #020617 100%);
+            border: 2px solid var(--fire-gold); border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(245, 158, 11, 0.2);
+        }
+        #gameCanvas { width: 100%; height: 100%; display: block; }
+        .game-hud { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; gap: 8px; flex-wrap: wrap; }
+        .qz-hud { display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; }
+        .hud-badge { background: rgba(15, 23, 42, 0.85); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 30px; font-weight: 800; font-size: 0.9rem; backdrop-filter: blur(8px); }
+
+        .race-track-container { background: rgba(17, 24, 39, 0.95); border: 2px solid var(--fire-gold); border-radius: 18px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
+        .race-track-header { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 900; color: #FFF; gap: 8px; }
+        .race-line-bar { position: relative; width: 100%; height: 180px; background: rgba(3, 7, 18, 0.95); border-radius: 14px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
+        .race-finish-line { position: absolute; right: 45px; top: 0; bottom: 0; width: 16px; background: repeating-linear-gradient(0deg, #fff, #fff 10px, #111 10px, #111 20px); border: 1px solid #F59E0B; z-index: 2; }
+        .race-finish-flag { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; z-index: 3; }
+        .race-racer-row { position: absolute; left: 0; right: 70px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); }
+        .race-racer-row.is-me { background: rgba(245, 158, 11, 0.07); }
+        .race-racer-icon { position: absolute; top: 50%; transform: translate(-50%, -50%); font-size: 1.3rem; transition: left 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5; line-height: 1; white-space: nowrap; }
+        .race-racer-icon .rn { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 5px; font-size: 0.62rem; font-weight: 800; color: #CBD5E1; }
+        .race-racer-icon.is-user { filter: drop-shadow(0 0 6px #F59E0B); font-size: 1.5rem; z-index: 6; }
+        .race-racer-icon.is-user .rn { color: #FCD34D; }
+        .help-line { text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--fire-gold); }
+
+        .qz-card { background: rgba(17, 24, 39, 0.92); border: 1px solid var(--card-border); border-radius: 22px; padding: 1.6rem; text-align: center; transition: box-shadow 0.3s, border-color 0.3s; }
+        .qz-card.flash-ok { border-color: var(--accent); box-shadow: 0 0 30px rgba(16, 185, 129, 0.45); }
+        .mode-tag { display: inline-block; padding: 7px 16px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; margin-bottom: 14px; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--fire-gold); color: var(--fire-gold); }
+        .penalty-line { margin-top: 14px; font-weight: 800; color: var(--fire-red); font-size: 1.05rem; display: none; }
+        #qz-done { display: none; font-size: 1.4rem; font-weight: 900; color: var(--accent); padding: 1.5rem 0; }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(3, 7, 18, 0.92); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 500; }
+        .modal-box { background: rgba(17, 24, 39, 0.97); border: 2px solid var(--fire-gold); border-radius: 24px; padding: 2.2rem; width: 90%; max-width: 560px; max-height: 92vh; overflow-y: auto; text-align: center; box-shadow: 0 0 50px rgba(245, 158, 11, 0.3); }
+        .modal-box .quiz-grid { margin-top: 1.2rem; gap: 1rem; }
+        .modal-box .quiz-opt { padding: 1.1rem; font-size: 1rem; }
+        .modal-box .write-input { margin-top: 1rem; }
+        .rank-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 16px; background: rgba(15, 23, 42, 0.8); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--card-border); }
+        .rank-item.me { border-color: var(--fire-gold); background: rgba(245, 158, 11, 0.1); }
+        .rank-stats { font-weight: 800; color: var(--accent); font-size: 0.85rem; white-space: nowrap; }
+        .countdown-num { font-size: 9rem; font-weight: 900; background: linear-gradient(135deg, #FDE68A, #EF4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: cdPop 0.9s ease-out; }
+        @keyframes cdPop { 0% { transform: scale(2.2); opacity: 0; } 35% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.85; } }
+
+        @media (max-width: 850px) {
+            .main-container { grid-template-columns: 1fr; }
+            .quiz-grid { grid-template-columns: 1fr; }
+            .lobby-wrap { grid-template-columns: 1fr; }
+            .menu-grid, .mode-grid, .opt-row { grid-template-columns: 1fr; }
+            .pet-grid { grid-template-columns: repeat(5, 1fr); }
+            .race-track-header span:nth-child(2) { display: none; }
+            .code-value { font-size: 2.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-dragon" style="color:var(--fire-gold);"></i> TRS6 - HỌC TỪ VỰNG & ĐẤU ARENA
+        </div>
+        <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+            <button class="btn-audio-toggle" onclick="toggleMuteAudio()">
+                <i class="fa-solid fa-volume-high" id="audio-icon"></i> <span id="audio-status-text">Âm Thanh: Bật</span>
+            </button>
+            <div style="background:rgba(15, 23, 42, 0.8); padding:8px 18px; border-radius:30px; border:1px solid var(--card-border); font-size:0.95rem; font-weight:700;">
+                <i class="fa-solid fa-stopwatch" style="color:var(--fire-gold);"></i> Ca học: <span id="session-timer" style="color:#FFF;">10:00</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div style="font-size:0.95rem; font-weight:800; color:#E2E8F0;"><i class="fa-solid fa-dragon" style="color:var(--fire-gold);"></i> Lộ Trình 5 Ngày (150 Từ)</div>
+            <div id="day-list" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; max-height:calc(100vh - 200px);"></div>
+        </aside>
+
+        <main class="content-area">
+            <div class="step-stepper">
+                <button class="step-pill active" id="pill-1" onclick="goToStep(1)">1. Lật Flashcard 🎴</button>
+                <button class="step-pill" id="pill-2" onclick="goToStep(2)">2. Trắc Nghiệm 📝</button>
+                <button class="step-pill" id="pill-3" onclick="goToStep(3)">3. Luyện Viết Sâu ✍️</button>
+                <button class="step-pill" id="pill-4" onclick="goToStep(4)">4. Bài Test Ca 🛡️</button>
+                <button class="step-pill" id="pill-5" onclick="goToStep(5)" style="border:1px solid var(--fire-gold);">5. Đấu Arena ⚔️</button>
+            </div>
+
+            <div class="feedback-banner banner-taunt" id="taunt-banner">
+                <i class="fa-solid fa-face-laugh-squint fa-xl"></i> <span id="taunt-text">Sai rồi Hưng ơi! Gà quá!</span>
+            </div>
+            <div class="feedback-banner banner-praise" id="praise-banner">
+                <i class="fa-solid fa-fire-flame-curved fa-xl" style="color:var(--accent);"></i> <span id="praise-text">Quá đỉnh! Chuẩn xác!</span>
+            </div>
+
+            <!-- STEP 1: LẬT FLASHCARD -->
+            <div id="panel-1" class="panel-box">
+                <div class="flip-card-container" id="fc-card-box" onclick="flipFcCard()">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div style="font-size:4rem;" id="fc-emoji">⚡</div>
+                            <div class="word-title" id="fc-word">advancement</div>
+                            <div style="color:var(--text-muted); font-style:italic;" id="fc-type">(n)</div>
+                            <div style="font-size:0.85rem; color:var(--fire-gold);"><i class="fa-solid fa-hand-pointer"></i> Nhấp thẻ để lật & đọc phát âm</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div class="meaning-title" id="fc-meaning">sự tiến bộ</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:center; gap:15px; margin-top:1.5rem; flex-wrap:wrap;">
+                    <button class="btn-action" style="background:rgba(30, 41, 59, 0.8);" onclick="flipFcCard()"><i class="fa-solid fa-rotate"></i> Lật thẻ</button>
+                    <button class="btn-action" onclick="speakCurrentWord()"><i class="fa-solid fa-volume-high"></i> Phát âm</button>
+                    <button class="btn-action" onclick="nextFc()">Tiếp theo <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 2: TRẮC NGHIỆM -->
+            <div id="panel-2" class="panel-box" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:var(--text-muted); font-weight:700;"><i class="fa-solid fa-list-check"></i> Ôn tập Trắc nghiệm nhanh</div>
+                    <div style="color:var(--fire-gold); font-weight:800;" id="quiz-step-count">Câu: 1/15</div>
+                </div>
+                <div class="word-title" id="quiz-step-word">advancement</div>
+                <div class="quiz-grid" id="quiz-step-options" style="margin-top:1.5rem;"></div>
+            </div>
+
+            <!-- STEP 3: LUYỆN VIẾT -->
+            <div id="panel-3" class="panel-box" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:var(--text-muted); font-weight:700;"><i class="fa-solid fa-keyboard"></i> Ép nhớ chính tả</div>
+                    <div style="color:var(--fire-gold); font-weight:800;" id="write-count">Lần: 1/2</div>
+                </div>
+                <div class="meaning-title" id="write-meaning">sự tiến bộ</div>
+                <div style="text-align:center; color:var(--text-muted); font-size:1.15rem;" id="write-hint">Gợi ý: ad...</div>
+                <input type="text" class="write-input" id="write-input" placeholder="Gõ từ tiếng Anh rồi nhấn Enter..." onkeypress="handleWriteKey(event)" autocomplete="off">
+                <button class="btn-action" onclick="checkWrite()">Xác nhận (Enter)</button>
+            </div>
+
+            <!-- STEP 4: BÀI TEST CA -->
+            <div id="panel-4" class="panel-box" style="display:none; justify-content:flex-start; overflow-y:auto; max-height:600px;">
+                <h3 style="border-bottom:1px solid var(--card-border); padding-bottom:15px; color:#F1F5F9; font-weight:800;">
+                    <i class="fa-solid fa-file-shield" style="color:var(--cyber-cyan);"></i> Kiểm Tra Tổng Ôn Ca (<span id="test-total">15</span> Từ)
+                </h3>
+                <div id="test-summary-box" style="display:none; background:rgba(3, 7, 18, 0.8); border:1px solid var(--card-border); border-radius:18px; padding:2rem; text-align:center; margin-top:1rem;">
+                    <h2 id="summary-score-title" style="font-size:2.5rem; font-weight:900; margin-bottom:10px;"></h2>
+                    <p id="summary-subtext" style="color:var(--accent); font-weight:700; font-size:1.2rem;"></p>
+                    <button class="btn-action" style="margin-top:1.5rem;" onclick="goToStep(4)"><i class="fa-solid fa-rotate-right"></i> Làm Lại Test</button>
+                </div>
+                <div id="test-list" style="display:flex; flex-direction:column; gap:14px; margin-top:1.2rem;"></div>
+                <button class="btn-action" id="btn-submit-test" style="background:linear-gradient(135deg, var(--accent), #059669); margin-top:1.8rem; width:100%; padding:18px;" onclick="submitTest()">
+                    <i class="fa-solid fa-paper-plane"></i> Nộp Bài & Chấm Điểm
+                </button>
+            </div>
+
+            <!-- STEP 5: ĐẤU ARENA ONLINE -->
+            <div id="panel-5" class="panel-box" style="display:none;">
+
+                <!-- 5.1 MENU: tạo phòng / nhập mã -->
+                <div class="arena-screen" id="arenaMenu">
+                    <div class="arena-hero">
+                        <div class="arena-hero-icon">⚔️</div>
+                        <h2>ĐẤU ARENA ONLINE</h2>
+                        <p>Tạo phòng, gửi mã cho bạn bè và so tài từ vựng với nhau!</p>
+                    </div>
+                    <div class="arena-box">
+                        <label class="field-label" for="playerNameInput">Tên hiển thị của bạn</label>
+                        <input type="text" class="text-input" id="playerNameInput" placeholder="VD: Hưng Pro" maxlength="15" autocomplete="off">
+
+                        <div class="menu-grid">
+                            <div class="menu-card">
+                                <h3>👑 Tạo phòng mới</h3>
+                                <p>Bạn làm chủ phòng, chọn chế độ chơi và nhận mã gửi cho bạn bè.</p>
+                                <button class="btn-action btn-full" onclick="createRoom(false)"><i class="fa-solid fa-plus"></i> Tạo phòng</button>
+                            </div>
+                            <div class="menu-card">
+                                <h3>🔑 Vào phòng có sẵn</h3>
+                                <input type="text" class="text-input code-input" id="roomCodeInput" placeholder="MÃ PHÒNG" maxlength="5" autocomplete="off" spellcheck="false">
+                                <button class="btn-action btn-full" onclick="joinRoom()"><i class="fa-solid fa-right-to-bracket"></i> Vào phòng</button>
+                            </div>
+                        </div>
+
+                        <button class="btn-action btn-ghost btn-full" onclick="createRoom(true)"><i class="fa-solid fa-robot"></i> Chơi Solo với Bot (không cần Internet)</button>
+                        <div class="menu-status" id="menuStatus"></div>
+                    </div>
+                </div>
+
+                <!-- 5.2 SẢNH CHỜ -->
+                <div class="arena-screen" id="arenaLobby">
+                    <div class="lobby-wrap">
+                        <div style="display:flex; flex-direction:column; gap:1.2rem; min-width:0;">
+                            <div class="lobby-card code-card">
+                                <div class="code-label">MÃ PHÒNG</div>
+                                <div class="code-value" id="lobbyCode">-----</div>
+                                <button class="btn-action btn-ghost btn-sm" id="btnCopyCode" onclick="copyRoomCode()"><i class="fa-solid fa-copy"></i> Sao chép mã</button>
+                                <div class="code-hint" id="lobbyHint"></div>
+                            </div>
+                            <div class="lobby-card">
+                                <div class="section-title"><span>Người chơi trong phòng</span><b id="lobbyCount">1/10</b></div>
+                                <div class="players-list" id="playersListGrid"></div>
+                                <button class="btn-action btn-ghost btn-sm btn-full" id="btnAddBot" onclick="addBotPlayer()"><i class="fa-solid fa-robot"></i> Thêm Bot</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:1.2rem; min-width:0;">
+                            <div class="lobby-card">
+                                <div class="section-title"><span>Chế độ chơi</span></div>
+                                <div class="mode-grid">
+                                    <div class="mode-card" id="modeCard-quiz" onclick="hostSetMode('quiz')">
+                                        <div class="mc-ico">🧠</div>
+                                        <div class="mc-name">Đấu Trí</div>
+                                        <div class="mc-desc">Cả phòng làm cùng bộ câu hỏi (trắc nghiệm xen kẽ viết từ). Ai làm xong nhanh nhất sẽ thắng!</div>
+                                    </div>
+                                    <div class="mode-card" id="modeCard-race" onclick="hostSetMode('race')">
+                                        <div class="mc-ico">🏃</div>
+                                        <div class="mc-name">Đua Runner</div>
+                                        <div class="mc-desc">Chạy né chướng ngại vật, đụng là phải trả lời để tiến lên. Ai về đích trước thắng!</div>
+                                    </div>
+                                </div>
+                                <div class="opt-row">
+                                    <div><div class="section-title"><span>Bộ từ</span></div><select id="setSelect" onchange="hostSetSet(this.value)"></select></div>
+                                    <div><div class="section-title"><span>Độ khó Bot</span></div><select id="botSelect" onchange="hostSetBot(this.value)"></select></div>
+                                </div>
+                            </div>
+
+                            <div class="lobby-card">
+                                <div class="section-title"><span>Linh vật của bạn</span></div>
+                                <div class="pet-grid" id="petGrid"></div>
+                            </div>
+
+                            <div class="lobby-card" style="gap:10px;">
+                                <button class="btn-action btn-full" id="btnStart" style="padding:18px; font-size:1.05rem;" onclick="hostStart()"><i class="fa-solid fa-play"></i> Bắt Đầu Trận Đấu</button>
+                                <div class="start-hint" id="startHint"></div>
+                                <div class="wait-note" id="lobbyWait" style="display:none;"><i class="fa-solid fa-hourglass-half"></i> Đang chờ chủ phòng bắt đầu...</div>
+                                <button class="btn-action btn-ghost btn-sm btn-full" onclick="leaveRoomUI()"><i class="fa-solid fa-door-open"></i> Rời phòng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5.3 CHẾ ĐỘ ĐUA RUNNER -->
+                <div class="arena-screen" id="arenaRace">
+                    <div class="game-canvas-container">
+                        <div class="game-hud">
+                            <div class="hud-badge" style="color:var(--fire-gold);"><i class="fa-solid fa-flag-checkered"></i> <span id="hud-progress">0 / 15 từ</span></div>
+                            <div class="hud-badge" style="color:#FCD34D;"><i class="fa-solid fa-ranking-star"></i> Hạng <span id="hud-rank">#1</span></div>
+                            <div class="hud-badge" style="color:var(--accent);"><i class="fa-solid fa-star"></i> <span id="hud-score">0 đ</span></div>
+                        </div>
+                        <canvas id="gameCanvas" width="1000" height="350"></canvas>
+                    </div>
+                    <div class="race-track-container">
+                        <div class="race-track-header"><span>🏁 XUẤT PHÁT</span><span style="color:var(--fire-gold);">⚡ ĐƯỜNG ĐUA TRỰC TIẾP</span><span>ĐÍCH 🚩</span></div>
+                        <div class="race-line-bar" id="laneBarRace">
+                            <div class="race-finish-line"></div>
+                            <div class="race-finish-flag">🏁</div>
+                        </div>
+                    </div>
+                    <div class="help-line">⚡ <b>SPACE / ↑</b> để Nhảy | <b>↓</b> để Cúi | Đụng chướng ngại vật → trả lời 2 câu để tiến lên!</div>
+                    <div style="text-align:center;"><button class="btn-mini host-only" onclick="hostForceEnd()">⏹ Kết thúc trận (chủ phòng)</button></div>
+                </div>
+
+                <!-- 5.4 CHẾ ĐỘ ĐẤU TRÍ -->
+                <div class="arena-screen" id="arenaQuiz">
+                    <div class="qz-hud">
+                        <div class="hud-badge" style="color:var(--fire-gold);"><i class="fa-solid fa-list-check"></i> <span id="qz-count">Câu 1/15</span></div>
+                        <div class="hud-badge" style="color:var(--cyber-cyan);"><i class="fa-solid fa-stopwatch"></i> <span id="qz-time">0.0s</span></div>
+                        <div class="hud-badge" style="color:var(--accent);"><i class="fa-solid fa-star"></i> <span id="qz-score">0 đ</span></div>
+                        <div class="hud-badge" style="color:#FCD34D;"><i class="fa-solid fa-ranking-star"></i> Hạng <span id="qz-rank">#1</span></div>
+                    </div>
+                    <div class="race-track-container">
+                        <div class="race-track-header"><span>🏁 XUẤT PHÁT</span><span style="color:var(--fire-gold);">⚡ TIẾN ĐỘ LÀM BÀI CỦA CẢ PHÒNG</span><span>HOÀN THÀNH 🚩</span></div>
+                        <div class="race-line-bar" id="laneBarQuiz">
+                            <div class="race-finish-line"></div>
+                            <div class="race-finish-flag">🏁</div>
+                        </div>
+                    </div>
+                    <div class="qz-card" id="qz-card">
+                        <div id="qz-body">
+                            <div class="mode-tag" id="qz-mode-tag">📝 TRẮC NGHIỆM</div>
+                            <div id="qz-quiz-box">
+                                <div class="word-title" id="qz-word">advancement</div>
+                                <div class="quiz-grid" id="qz-options" style="margin-top:1.4rem;"></div>
+                            </div>
+                            <div id="qz-write-box" style="display:none; max-width:540px; margin:0 auto;">
+                                <div class="meaning-title" id="qz-write-meaning">sự tiến bộ</div>
+                                <input type="text" class="write-input" id="qz-write-input" style="margin-top:1.2rem;" placeholder="Gõ từ tiếng Anh rồi nhấn Enter..." onkeypress="handleQzWriteKey(event)" autocomplete="off" spellcheck="false">
+                                <button class="btn-action btn-full" style="margin-top:1rem;" onclick="quizCheckWrite()">Xác nhận (Enter)</button>
+                            </div>
+                            <div class="penalty-line" id="qz-penalty">⚠️ Sai rồi! Bị khóa <span id="qz-penalty-sec">3</span> giây rồi làm lại câu này!</div>
+                        </div>
+                        <div id="qz-done">🏁 Bạn đã hoàn thành! Đang chờ kết quả...</div>
+                    </div>
+                    <div style="text-align:center;"><button class="btn-mini host-only" onclick="hostForceEnd()">⏹ Kết thúc trận (chủ phòng)</button></div>
+                </div>
+            </div>
+</main>
+    </div>
+
+    <!-- ĐẾM NGƯỢC TRƯỚC TRẬN -->
+    <div class="modal-overlay" id="countdownModal" style="z-index:600;">
+        <div class="countdown-num" id="countdownNum">3</div>
+    </div>
+
+    <!-- POPUP CÂU HỎI KHI ĐỤNG CHƯỚNG NGẠI VẬT (CHẾ ĐỘ ĐUA) -->
+    <div class="modal-overlay" id="questionModal">
+        <div class="modal-box">
+            <div style="font-size:0.85rem; font-weight:800; color:var(--fire-gold); margin-bottom:10px;" id="q-step-tag">CÂU HỎI CẤP CỨU (1/2)</div>
+
+            <div id="q-quiz-view">
+                <div style="font-size:1.8rem; font-weight:900; color:white; margin-bottom:1rem;" id="q-word-title">advancement</div>
+                <div class="quiz-grid" id="q-quiz-options"></div>
+            </div>
+
+            <div id="q-write-view" style="display:none;">
+                <div style="font-size:1.4rem; font-weight:800; color:var(--cyber-cyan); margin-bottom:0.8rem;" id="q-write-meaning">sự tiến bộ</div>
+                <input type="text" class="write-input" id="q-write-input" placeholder="Gõ từ tiếng Anh rồi bấm Enter..." onkeypress="handleQWriteKey(event)" autocomplete="off" spellcheck="false">
+                <button class="btn-action btn-full" style="margin-top:1.2rem;" onclick="checkQWriteAnswer()">Xác nhận (Enter)</button>
+            </div>
+
+            <div id="penalty-notice" style="display:none; margin-top:15px; font-weight:800; color:var(--fire-red); font-size:1.1rem;">
+                ⚠️ Trả lời sai! Bị khóa <span id="countdownTimer">5</span> giây và đổi câu hỏi mới!
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP BẢNG CHUNG CUỘC -->
+    <div class="modal-overlay" id="leaderboardModal">
+        <div class="modal-box" style="border-color:var(--accent); box-shadow: 0 0 50px rgba(16, 185, 129, 0.3);">
+            <div style="font-size:4rem; margin-bottom:6px;" id="rankBadgeIcon">🏆</div>
+            <h2 style="font-size:2rem; font-weight:900; color:var(--accent); margin-bottom:4px;">BẢNG CHUNG CUỘC</h2>
+            <p style="color:var(--fire-gold); font-size:1rem; margin-bottom:4px; font-weight:800;" id="rankSubtitleText"></p>
+            <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:14px; font-weight:700;" id="rankModeLine"></p>
+            <div id="rankList" style="margin-bottom:1.2rem; max-height:280px; overflow-y:auto;"></div>
+            <div id="resHostBtns" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-action btn-ghost" style="flex:1;" onclick="hostBackToLobby(false)"><i class="fa-solid fa-house"></i> Về Phòng Chờ</button>
+                <button class="btn-action" style="flex:1;" onclick="hostBackToLobby(true)"><i class="fa-solid fa-rotate-right"></i> Đấu Lại Ngay</button>
+            </div>
+            <div id="resGuestBtns" style="display:none;">
+                <div class="wait-note"><i class="fa-solid fa-hourglass-half"></i> Đang chờ chủ phòng...</div>
+                <button class="btn-action btn-ghost btn-full" onclick="leaveRoomUI()"><i class="fa-solid fa-door-open"></i> Rời phòng</button>
+            </div>
+        </div>
+    </div>
+
+<!-- ÂM THANH -->
+    <audio id="audio-clap" src="clap.mp3" preload="auto"></audio>
+    <audio id="audio-laugh" src="laugh.mp3" preload="auto"></audio>
+    <audio id="audio-boo" src="boo.mp3" preload="auto"></audio>
+    <audio id="audio-win" src="win.mp3" preload="auto"></audio>
+    <audio id="audio-lobby" src="lobby.mp3" preload="auto" loop></audio>
+    <audio id="audio-bgm" src="bgm.mp3" preload="auto" loop></audio>
+    <audio id="audio-champion" src="champion.mp3" preload="auto"></audio>
+    <audio id="audio-normal" src="normal.mp3" preload="auto"></audio>
+    <audio id="audio-skibidi" src="skibidi.mp3" preload="auto"></audio>
+
+    <script>
+        // ======================= DỮ LIỆU 150 TỪ =======================
+        const rawVocabData = [
+            { id: 1, word: "advancement", type: "(n)", meaning: "sự tiến bộ", day: 1, session: 1 },
+            { id: 2, word: "preeminent", type: "(adj)", meaning: "ưu tú, xuất sắc", day: 1, session: 1 },
+            { id: 3, word: "antidiscrimination", type: "(n)", meaning: "sự chống phân biệt", day: 1, session: 1 },
+            { id: 4, word: "detrimental", type: "(adj)", meaning: "có hại", day: 1, session: 1 },
+            { id: 5, word: "segregationist", type: "(adj)", meaning: "phân biệt chủng tộc", day: 1, session: 1 },
+            { id: 6, word: "inequalities", type: "(n)", meaning: "sự bất bình đẳng", day: 1, session: 1 },
+            { id: 7, word: "civil disobedience", type: "(n)", meaning: "bất tuân dân sự", day: 1, session: 1 },
+            { id: 8, word: "boycott", type: "(v)", meaning: "tẩy chay", day: 1, session: 1 },
+            { id: 9, word: "inhumane", type: "(adj)", meaning: "vô nhân đạo", day: 1, session: 1 },
+            { id: 10, word: "unconscionable", type: "(adj)", meaning: "vô lương tâm", day: 1, session: 1 },
+            { id: 11, word: "nonviolent resistance", type: "(n)", meaning: "sự phản kháng không bạo lực", day: 1, session: 1 },
+            { id: 12, word: "succumb", type: "(v)", meaning: "đầu hàng", day: 1, session: 1 },
+            { id: 13, word: "plight", type: "(n)", meaning: "cảnh ngộ", day: 1, session: 1 },
+            { id: 14, word: "marginalize", type: "(v)", meaning: "cô lập", day: 1, session: 1 },
+            { id: 15, word: "ostracize", type: "(v)", meaning: "tẩy chay", day: 1, session: 1 },
+
+            { id: 16, word: "charismatic", type: "(adj)", meaning: "thuyết phục, lôi cuốn", day: 1, session: 2 },
+            { id: 17, word: "adhere to", type: "(v)", meaning: "tuân thủ theo", day: 1, session: 2 },
+            { id: 18, word: "emulate", type: "(v)", meaning: "giả lập, bắt chước", day: 1, session: 2 },
+            { id: 19, word: "militant", type: "(adj)", meaning: "chiến đấu, có khuynh hướng sử dụng bạo lực", day: 1, session: 2 },
+            { id: 20, word: "palatable", type: "(adj)", meaning: "dễ chấp nhận", day: 1, session: 2 },
+            { id: 21, word: "alienate", type: "(v)", meaning: "làm cho xa lánh", day: 1, session: 2 },
+            { id: 22, word: "galvanize", type: "(v)", meaning: "kích động, khuấy động", day: 1, session: 2 },
+            { id: 23, word: "anticipate", type: "(v)", meaning: "dự đoán, lường trước", day: 1, session: 2 },
+            { id: 24, word: "prescience", type: "(n)", meaning: "khả năng tiên đoán", day: 1, session: 2 },
+            { id: 25, word: "deem", type: "(v)", meaning: "tưởng là, xem là", day: 1, session: 2 },
+            { id: 26, word: "allegiance", type: "(n)", meaning: "lòng trung thành", day: 1, session: 2 },
+            { id: 27, word: "levy", type: "(v)", meaning: "đánh thuế", day: 1, session: 2 },
+            { id: 28, word: "uneventfully", type: "(adv)", meaning: "một cách suôn sẻ", day: 1, session: 2 },
+            { id: 29, word: "unwavering", type: "(adj)", meaning: "kiên định, không thay đổi", day: 1, session: 2 },
+            { id: 30, word: "radical", type: "(n)", meaning: "một người cấp tiến", day: 1, session: 2 },
+
+            { id: 31, word: "insinuate", type: "(v)", meaning: "len lỏi", day: 2, session: 1 },
+            { id: 32, word: "breakthrough", type: "(n)", meaning: "bước đột phá", day: 2, session: 1 },
+            { id: 33, word: "transparency", type: "(n)", meaning: "sự minh bạch", day: 2, session: 1 },
+            { id: 34, word: "accuracy", type: "(n)", meaning: "sự chính xác", day: 2, session: 1 },
+            { id: 35, word: "transition", type: "(v)", meaning: "chuyển dịch", day: 2, session: 1 },
+            { id: 36, word: "turbulent", type: "(adj)", meaning: "hỗn loạn", day: 2, session: 1 },
+            { id: 37, word: "invigorate", type: "(v)", meaning: "tiếp thêm sinh lực", day: 2, session: 1 },
+            { id: 38, word: "thrive on", type: "(v)", meaning: "phát triển mạnh nhờ...", day: 2, session: 1 },
+            { id: 39, word: "dominance", type: "(n)", meaning: "sự thống trị", day: 2, session: 1 },
+            { id: 40, word: "jump-start", type: "(v)", meaning: "kích thích phát triển", day: 2, session: 1 },
+            { id: 41, word: "infrastructure", type: "(n)", meaning: "cơ sở hạ tầng", day: 2, session: 1 },
+            { id: 42, word: "brain drain", type: "(n)", meaning: "chảy máu chất xám", day: 2, session: 1 },
+            { id: 43, word: "futility", type: "(n)", meaning: "sự vô ích", day: 2, session: 1 },
+            { id: 44, word: "cynical", type: "(adj)", meaning: "hoài nghi", day: 2, session: 1 },
+            { id: 45, word: "enact", type: "(v)", meaning: "ban hành", day: 2, session: 1 },
+
+            { id: 46, word: "fizzle", type: "(v)", meaning: "thất bại", day: 2, session: 2 },
+            { id: 47, word: "waft", type: "(v)", meaning: "(mùi hương, khói) bay lơ lửng", day: 2, session: 2 },
+            { id: 48, word: "contemplate", type: "(v)", meaning: "suy nghĩ, cân nhắc", day: 2, session: 2 },
+            { id: 49, word: "tabulate", type: "(v)", meaning: "lập bảng", day: 2, session: 2 },
+            { id: 50, word: "nonsalarised", type: "(adj)", meaning: "không được trả lương", day: 2, session: 2 },
+            { id: 51, word: "keep track of", type: "(v)", meaning: "theo dõi", day: 2, session: 2 },
+            { id: 52, word: "cap", type: "(v)", meaning: "chặn trên, chặn mức trần", day: 2, session: 2 },
+            { id: 53, word: "daunting", type: "(adj)", meaning: "gây sợ hãi, làm nản chí", day: 2, session: 2 },
+            { id: 54, word: "asset", type: "(n)", meaning: "tài sản", day: 2, session: 2 },
+            { id: 55, word: "tangible", type: "(adj)", meaning: "hiện hữu, có thể nhìn thấy", day: 2, session: 2 },
+            { id: 56, word: "nonexcludable", type: "(adj)", meaning: "không có sự ngoại trừ", day: 2, session: 2 },
+            { id: 57, word: "nonrivalrous", type: "(adj)", meaning: "không có sự cạnh tranh", day: 2, session: 2 },
+            { id: 58, word: "commodities", type: "(n)", meaning: "hàng hóa", day: 2, session: 2 },
+            { id: 59, word: "unquantifiable", type: "(adj)", meaning: "không đo lường được", day: 2, session: 2 },
+            { id: 60, word: "appraise", type: "(v)", meaning: "đánh giá, định giá", day: 2, session: 2 },
+
+            { id: 61, word: "incidence rate", type: "(n)", meaning: "tỉ lệ mắc", day: 3, session: 1 },
+            { id: 62, word: "mortality rate", type: "(n)", meaning: "tỉ lệ chết", day: 3, session: 1 },
+            { id: 63, word: "skewed", type: "(adj)", meaning: "bị bóp méo, xuyên tạc", day: 3, session: 1 },
+            { id: 64, word: "disproportionate", type: "(adj)", meaning: "không cân xứng", day: 3, session: 1 },
+            { id: 65, word: "cancer detection", type: "(n)", meaning: "việc phát hiện ra ung thư", day: 3, session: 1 },
+            { id: 66, word: "life expectancy", type: "(n)", meaning: "tuổi thọ", day: 3, session: 1 },
+            { id: 67, word: "oncological", type: "(adj)", meaning: "thuộc về ung thư", day: 3, session: 1 },
+            { id: 68, word: "genetic mutation", type: "(n)", meaning: "sự đột biến gen", day: 3, session: 1 },
+            { id: 69, word: "tumor mass", type: "(n)", meaning: "khối u", day: 3, session: 1 },
+            { id: 70, word: "contingent upon", type: "(adj)", meaning: "phụ thuộc vào", day: 3, session: 1 },
+            { id: 71, word: "prognosis", type: "(n)", meaning: "tiên lượng", day: 3, session: 1 },
+            { id: 72, word: "malignant", type: "(adj)", meaning: "ác tính", day: 3, session: 1 },
+            { id: 73, word: "fatal", type: "(adj)", meaning: "gây chết người", day: 3, session: 1 },
+            { id: 74, word: "incubation", type: "(n)", meaning: "sự ủ bệnh", day: 3, session: 1 },
+            { id: 75, word: "lie dormant", type: "(v)", meaning: "nằm im", day: 3, session: 1 },
+
+            { id: 76, word: "appalling", type: "(adj)", meaning: "kinh hoàng, đáng sợ", day: 3, session: 2 },
+            { id: 77, word: "efficacious", type: "(adj)", meaning: "hiệu quả, hiệu nghiệm", day: 3, session: 2 },
+            { id: 78, word: "downplay", type: "(v)", meaning: "làm bớt nghiêm trọng", day: 3, session: 2 },
+            { id: 79, word: "motor function", type: "(n)", meaning: "chức năng vận động", day: 3, session: 2 },
+            { id: 80, word: "brain tissue", type: "(n)", meaning: "mô não", day: 3, session: 2 },
+            { id: 81, word: "transmissible", type: "(adj)", meaning: "có thể lây truyền", day: 3, session: 2 },
+            { id: 82, word: "organism", type: "(n)", meaning: "sinh vật, cơ thể", day: 3, session: 2 },
+            { id: 83, word: "accumulate", type: "(v)", meaning: "tích lũy lại", day: 3, session: 2 },
+            { id: 84, word: "plague", type: "(n)", meaning: "bệnh dịch", day: 3, session: 2 },
+            { id: 85, word: "onset", type: "(n)", meaning: "thời điểm phát bệnh", day: 3, session: 2 },
+            { id: 86, word: "cervical cancer", type: "(n)", meaning: "ung thư cổ tử cung", day: 3, session: 2 },
+            { id: 87, word: "impair", type: "(v)", meaning: "làm hỏng, làm suy yếu", day: 3, session: 2 },
+            { id: 88, word: "viral", type: "(adj)", meaning: "thuộc về virus", day: 3, session: 2 },
+            { id: 89, word: "prone to", type: "(adj)", meaning: "dễ mắc (bệnh)", day: 3, session: 2 },
+            { id: 90, word: "single-handedly", type: "(adv)", meaning: "tự mình, một mình", day: 3, session: 2 },
+
+            { id: 91, word: "divergent", type: "(adj)", meaning: "khác nhau", day: 4, session: 1 },
+            { id: 92, word: "descend", type: "(v)", meaning: "đi xuống", day: 4, session: 1 },
+            { id: 93, word: "intermediary", type: "(adj)", meaning: "trung gian", day: 4, session: 1 },
+            { id: 94, word: "hierarchy", type: "(n)", meaning: "hệ thống cấp bậc", day: 4, session: 1 },
+            { id: 95, word: "transgression", type: "(n)", meaning: "tội lỗi, sự vi phạm", day: 4, session: 1 },
+            { id: 96, word: "torture", type: "(n)", meaning: "sự tra tấn", day: 4, session: 1 },
+            { id: 97, word: "archaeological", type: "(adj)", meaning: "thuộc khảo cổ học", day: 4, session: 1 },
+            { id: 98, word: "epoch", type: "(n)", meaning: "kỷ nguyên", day: 4, session: 1 },
+            { id: 99, word: "aesthetic", type: "(adj)", meaning: "thuộc về thẩm mỹ", day: 4, session: 1 },
+            { id: 100, word: "myths", type: "(n)", meaning: "chuyện hoang đường", day: 4, session: 1 },
+            { id: 101, word: "attribute....to", type: "(v)", meaning: "đổ cho, gán cho", day: 4, session: 1 },
+            { id: 102, word: "fanciful", type: "(adj)", meaning: "do tưởng tượng", day: 4, session: 1 },
+            { id: 103, word: "trump", type: "(v)", meaning: "mạnh hơn, thắng", day: 4, session: 1 },
+            { id: 104, word: "cremate", type: "(v)", meaning: "hỏa táng", day: 4, session: 1 },
+            { id: 105, word: "funerary", type: "(adj)", meaning: "thuộc về tang lễ", day: 4, session: 1 },
+
+            { id: 106, word: "ritual", type: "(n)", meaning: "nghi thức, nghi lễ", day: 4, session: 2 },
+            { id: 107, word: "eschew", type: "(v)", meaning: "tránh làm, từ bỏ", day: 4, session: 2 },
+            { id: 108, word: "corroborate", type: "(v)", meaning: "minh chứng cho", day: 4, session: 2 },
+            { id: 109, word: "ramifications", type: "(n)", meaning: "hậu quả, sự phân nhánh", day: 4, session: 2 },
+            { id: 110, word: "precursor", type: "(n)", meaning: "tiền thân", day: 4, session: 2 },
+            { id: 111, word: "epic", type: "(adj)", meaning: "hoành tráng", day: 4, session: 2 },
+            { id: 112, word: "topographical", type: "(adj)", meaning: "thuộc về địa hình", day: 4, session: 2 },
+            { id: 113, word: "revival", type: "(n)", meaning: "sự hồi sinh, phục hưng", day: 4, session: 2 },
+            { id: 114, word: "milieu", type: "(n)", meaning: "hoàn cảnh, môi trường", day: 4, session: 2 },
+            { id: 115, word: "yearning", type: "(n)", meaning: "sự khát khao", day: 4, session: 2 },
+            { id: 116, word: "undergo", type: "(v)", meaning: "trải qua", day: 4, session: 2 },
+            { id: 117, word: "prevail", type: "(v)", meaning: "thắng thế", day: 4, session: 2 },
+            { id: 118, word: "transcend", type: "(v)", meaning: "vượt qua, vượt quá", day: 4, session: 2 },
+            { id: 119, word: "poignantly", type: "(adv)", meaning: "một cách sâu sắc", day: 4, session: 2 },
+            { id: 120, word: "perseverance", type: "(n)", meaning: "tính kiên trì", day: 4, session: 2 },
+
+            { id: 121, word: "ventilation", type: "(n)", meaning: "sự thông gió", day: 5, session: 1 },
+            { id: 122, word: "bottling-up effect", type: "(n)", meaning: "hiệu ứng \"đóng chai\"", day: 5, session: 1 },
+            { id: 123, word: "exposure", type: "(n)", meaning: "sự tiếp xúc", day: 5, session: 1 },
+            { id: 124, word: "naturally occurring", type: "(adj)", meaning: "xảy ra tự nhiên", day: 5, session: 1 },
+            { id: 125, word: "hazardous", type: "(adj)", meaning: "độc hại, nguy hiểm", day: 5, session: 1 },
+            { id: 126, word: "privileged", type: "(adj)", meaning: "được đặc quyền", day: 5, session: 1 },
+            { id: 127, word: "expel", type: "(v)", meaning: "tống, đẩy ra", day: 5, session: 1 },
+            { id: 128, word: "pivotal", type: "(adj)", meaning: "quan trọng, then chốt", day: 5, session: 1 },
+            { id: 129, word: "precipitation", type: "(n)", meaning: "lượng mưa", day: 5, session: 1 },
+            { id: 130, word: "lag", type: "(n)", meaning: "sự tụt hậu, chậm trễ", day: 5, session: 1 },
+            { id: 131, word: "proclivity", type: "(n)", meaning: "xu hướng, khuynh hướng", day: 5, session: 1 },
+            { id: 132, word: "alleviate", type: "(v)", meaning: "làm dịu bớt, làm giảm", day: 5, session: 1 },
+            { id: 133, word: "proximity", type: "(n)", meaning: "sự gần, độ gần", day: 5, session: 1 },
+            { id: 134, word: "pathogenicity", type: "(n)", meaning: "khả năng gây bệnh", day: 5, session: 1 },
+            { id: 135, word: "entire suite", type: "(n)", meaning: "cả bộ, toàn bộ", day: 5, session: 1 },
+
+            { id: 136, word: "adverse", type: "(adj)", meaning: "tiêu cực, bất lợi", day: 5, session: 2 },
+            { id: 137, word: "aggravation", type: "(n)", meaning: "làm thêm trầm trọng", day: 5, session: 2 },
+            { id: 138, word: "acute", type: "(adj)", meaning: "cấp tính, nghiêm trọng", day: 5, session: 2 },
+            { id: 139, word: "vague", type: "(adj)", meaning: "mơ hồ, không rõ ràng", day: 5, session: 2 },
+            { id: 140, word: "circulation", type: "(n)", meaning: "sự lưu thông", day: 5, session: 2 },
+            { id: 141, word: "occupant", type: "(n)", meaning: "người cư ngụ", day: 5, session: 2 },
+            { id: 142, word: "maintenance", type: "(n)", meaning: "sự bảo dưỡng", day: 5, session: 2 },
+            { id: 143, word: "mitigate", type: "(v)", meaning: "làm giảm bớt", day: 5, session: 2 },
+            { id: 144, word: "high-efficiency", type: "(n)", meaning: "hiệu suất cao", day: 5, session: 2 },
+            { id: 145, word: "increment", type: "(n)", meaning: "sự tăng lên", day: 5, session: 2 },
+            { id: 146, word: "exceedingly", type: "(adv)", meaning: "quá chừng, cực kỳ", day: 5, session: 2 },
+            { id: 147, word: "dehumidifier", type: "(n)", meaning: "máy hút ẩm", day: 5, session: 2 },
+            { id: 148, word: "at full capacity", type: "(adv)", meaning: "hết công suất", day: 5, session: 2 },
+            { id: 149, word: "solar panels", type: "(n)", meaning: "tấm năng lượng mặt trời", day: 5, session: 2 },
+            { id: 150, word: "seep", type: "(v)", meaning: "rỉ ra, thấm qua", day: 5, session: 2 }
+        ];
+
+        // ======================= TIỆN ÍCH CHUNG =======================
+        let currentDay = 1, currentSession = 1, currentStep = 1;
+        let activeWords = [];
+        let sessionTimerInterval = null, sessionTimeLeft = 10 * 60;
+        let isMuted = false;
+
+        function $(id) { return document.getElementById(id); }
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        // Tạo 4 đáp án (1 đúng + 3 nhiễu) và dựng nút bằng DOM (không lỗi dấu nháy)
+        function buildOptions(container, correct, pool, onPick) {
+            const opts = [correct];
+            let guard = 0;
+            while (opts.length < 4 && guard++ < 500) {
+                const r = pool[Math.floor(Math.random() * pool.length)];
+                if (!opts.includes(r)) opts.push(r);
+            }
+            container.innerHTML = '';
+            shuffle(opts).forEach(o => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt';
+                btn.textContent = o;
+                btn.addEventListener('click', () => onPick(o === correct));
+                container.appendChild(btn);
+            });
+        }
+        const allMeanings = () => rawVocabData.map(w => w.meaning);
+
+        // ======================= ÂM THANH =======================
+        const EFFECT_IDS = ['clap', 'laugh', 'boo', 'win'];
+        const ENDING_IDS = ['champion', 'normal', 'skibidi'];
+        const MUSIC_IDS = ['lobby', 'bgm'];
+        let currentMusic = null;      // 'lobby' | 'bgm' | null
+        let currentEnding = null;
+
+        function stopAllEffectAudios() {
+            EFFECT_IDS.forEach(t => { const a = $('audio-' + t); if (a) { a.pause(); a.currentTime = 0; } });
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+        function stopEndingAudio() {
+            ENDING_IDS.forEach(t => { const a = $('audio-' + t); if (a) { a.pause(); a.currentTime = 0; } });
+            currentEnding = null;
+        }
+        function setMusic(name) {
+            currentMusic = name;
+            MUSIC_IDS.forEach(t => { if (t !== name) { const a = $('audio-' + t); a.pause(); } });
+            if (name && !isMuted) {
+                const a = $('audio-' + name);
+                a.play().catch(() => {});
+            }
+        }
+        function playEnding(name) {
+            stopEndingAudio();
+            if (isMuted) return;
+            currentEnding = name;
+            const a = $('audio-' + name);
+            a.currentTime = 0;
+            a.play().catch(() => {});
+        }
+        function toggleMuteAudio() {
+            isMuted = !isMuted;
+            const icon = $('audio-icon'), text = $('audio-status-text');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark';
+                text.innerText = 'Âm Thanh: Tắt';
+                stopAllEffectAudios();
+                stopEndingAudio();
+                MUSIC_IDS.forEach(t => $('audio-' + t).pause());
+            } else {
+                icon.className = 'fa-solid fa-volume-high';
+                text.innerText = 'Âm Thanh: Bật';
+                setMusic(currentMusic);
+            }
+        }
+        function playSoundFile(type) {
+            if (isMuted) return;
+            stopAllEffectAudios();
+            const audio = $('audio-' + type);
+            if (audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
+        }
+        function speakWord(text) {
+            if (isMuted) return;
+            stopAllEffectAudios();
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(text.replace(/\.{2,}/g, ' '));
+                utter.lang = 'en-US';
+                window.speechSynthesis.speak(utter);
+            }
+        }
+        function triggerBanner(isCorrect, customText = '') {
+            const taunt = $('taunt-banner'), praise = $('praise-banner');
+            taunt.style.display = 'none'; praise.style.display = 'none';
+            if (isCorrect) {
+                playSoundFile('clap'); praise.style.display = 'flex';
+                $('praise-text').innerText = customText || "Quá đỉnh! Chuẩn xác!";
+            } else {
+                playSoundFile('laugh'); taunt.style.display = 'flex';
+                $('taunt-text').innerText = customText || "Sai rồi Hưng ơi! Gà quá!";
+            }
+            setTimeout(() => { taunt.style.display = 'none'; praise.style.display = 'none'; }, 2000);
+        }
+
+        // ======================= SIDEBAR / CA HỌC =======================
+        function initSidebar() {
+            const list = $('day-list');
+            list.innerHTML = '';
+            for (let d = 1; d <= 5; d++) {
+                list.innerHTML += `
+                    <div>
+                        <div style="font-weight:800; color:#64748B; font-size:0.8rem; margin-bottom:6px;">DAY ${d}</div>
+                        <button class="btn-session ${currentDay===d && currentSession===1?'active':''}" onclick="startSession(${d}, 1)">Ca 1 (15 từ đầu)</button>
+                        <button class="btn-session ${currentDay===d && currentSession===2?'active':''}" onclick="startSession(${d}, 2)">Ca 2 (15 từ sau)</button>
+                    </div>
+                `;
+            }
+        }
+
+        function startSession(day, session) {
+            if (!confirmLeaveArena()) return;
+            currentDay = day; currentSession = session;
+            initSidebar();
+            activeWords = rawVocabData.filter(w => w.day === day && w.session === session);
+
+            if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+            sessionTimeLeft = 10 * 60;
+            $('session-timer').innerText = '10:00';
+            sessionTimerInterval = setInterval(() => {
+                if (sessionTimeLeft > 0) {
+                    sessionTimeLeft--;
+                    const m = Math.floor(sessionTimeLeft / 60).toString().padStart(2, '0');
+                    const s = (sessionTimeLeft % 60).toString().padStart(2, '0');
+                    $('session-timer').innerText = `${m}:${s}`;
+                }
+            }, 1000);
+
+            goToStep(1);
+        }
+
+        function goToStep(step) {
+            if (step === 5 && currentStep === 5) return;
+            if (!confirmLeaveArena()) return;
+            leaveArena();                 // rời phòng, dọn game & nhạc nếu đang ở Arena
+            currentStep = step;
+            stopAllEffectAudios();
+            stopEndingAudio();
+            for (let i = 1; i <= 5; i++) {
+                const panel = $(`panel-${i}`);
+                if (panel) panel.style.display = (i === step) ? 'flex' : 'none';
+                const pill = $(`pill-${i}`);
+                if (pill) pill.className = `step-pill ${i === step ? 'active' : (i < step ? 'completed' : '')}`;
+            }
+            if (step === 1) initStep1();
+            else if (step === 2) initStep2();
+            else if (step === 3) initStep3();
+            else if (step === 4) initStep4();
+            else if (step === 5) initStep5Arena();
+        }
+
+        // ======================= STEP 1: FLASHCARD =======================
+        let fcIdx = 0;
+        function initStep1() { fcIdx = 0; renderFc(); }
+        function renderFc() {
+            const item = activeWords[fcIdx];
+            $('fc-card-box').classList.remove('flipped');
+            $('fc-emoji').innerText = "⚡";
+            $('fc-word').innerText = item.word;
+            $('fc-type').innerText = item.type;
+            $('fc-meaning').innerText = item.meaning;
+        }
+        function flipFcCard() {
+            $('fc-card-box').classList.toggle('flipped');
+            speakWord(activeWords[fcIdx].word);
+        }
+        function speakCurrentWord() { speakWord(activeWords[fcIdx].word); }
+        function nextFc() {
+            if (fcIdx < activeWords.length - 1) { fcIdx++; renderFc(); }
+            else { triggerBanner(true, "Hoàn thành Lật thẻ!"); setTimeout(() => goToStep(2), 1200); }
+        }
+
+        // ======================= STEP 2: TRẮC NGHIỆM =======================
+        let quizIdx = 0;
+        function initStep2() { quizIdx = 0; renderQuizStep(); }
+        function renderQuizStep() {
+            const item = activeWords[quizIdx];
+            $('quiz-step-count').innerText = `Câu: ${quizIdx + 1}/${activeWords.length}`;
+            $('quiz-step-word').innerText = item.word;
+            buildOptions($('quiz-step-options'), item.meaning, allMeanings(), ok => checkQuizStep(ok));
+        }
+        function checkQuizStep(ok) {
+            if (ok) {
+                triggerBanner(true, "Chính xác!");
+                quizIdx++;
+                if (quizIdx < activeWords.length) setTimeout(renderQuizStep, 600);
+                else setTimeout(() => goToStep(3), 1200);
+            } else {
+                triggerBanner(false, "Chưa chuẩn rồi!");
+            }
+        }
+
+        // ======================= STEP 3: LUYỆN VIẾT =======================
+        let wIdx = 0, wCount = 1;
+        function initStep3() { wIdx = 0; wCount = 1; renderWrite(); }
+        function renderWrite() {
+            const item = activeWords[wIdx];
+            $('write-meaning').innerText = item.meaning;
+            $('write-count').innerText = `Lần: ${wCount}/2`;
+            $('write-hint').innerText = `Gợi ý: ${item.word.substring(0, 2)}...`;
+            $('write-input').value = '';
+            $('write-input').focus();
+        }
+        function handleWriteKey(e) { if (e.key === 'Enter') checkWrite(); }
+        function checkWrite() {
+            const item = activeWords[wIdx];
+            const val = $('write-input').value.trim().toLowerCase();
+            if (val === item.word.toLowerCase()) {
+                if (wCount < 2) { wCount++; triggerBanner(true); renderWrite(); }
+                else {
+                    wCount = 1; wIdx++;
+                    if (wIdx < activeWords.length) renderWrite();
+                    else setTimeout(() => goToStep(4), 1200);
+                }
+            } else { wCount = 1; triggerBanner(false); renderWrite(); }
+        }
+
+        // ======================= STEP 4: BÀI TEST CA =======================
+        function initStep4() {
+            $('test-total').innerText = activeWords.length;
+            $('test-summary-box').style.display = 'none';
+            $('btn-submit-test').style.display = 'block';
+            $('test-list').innerHTML = activeWords.map((item, idx) => `
+                <div style="background:rgba(3, 7, 18, 0.8); border:1px solid var(--card-border); border-radius:14px; padding:1.2rem;" id="test-card-${idx}">
+                    <div><b>Câu ${idx+1}:</b> Từ Tiếng Anh cho nghĩa <b style="color:var(--cyber-cyan);">${esc(item.meaning)}</b> là gì?</div>
+                    <input type="text" class="write-input" id="test-ans-${idx}" style="margin-top:10px; padding:12px;" placeholder="Gõ từ tiếng Anh..." autocomplete="off">
+                    <div id="test-feedback-${idx}" style="margin-top:8px; font-weight:700; display:none;"></div>
+                </div>
+            `).join('');
+        }
+
+        function submitTest() {
+            let correctCount = 0;
+            const total = activeWords.length;
+            activeWords.forEach((item, idx) => {
+                const inputEl = $(`test-ans-${idx}`);
+                const feedbackEl = $(`test-feedback-${idx}`);
+                const cardEl = $(`test-card-${idx}`);
+                const userVal = inputEl.value.trim().toLowerCase();
+                inputEl.disabled = true;
+
+                if (userVal === item.word.toLowerCase()) {
+                    correctCount++;
+                    cardEl.style.borderLeft = "4px solid var(--accent)"; feedbackEl.style.color = "var(--accent)";
+                    feedbackEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Chính xác! (${esc(item.word)})`;
+                } else {
+                    cardEl.style.borderLeft = "4px solid var(--fire-red)"; feedbackEl.style.color = "var(--fire-red)";
+                    feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Sai! Bạn gõ: "<b>${esc(userVal || 'Bỏ trống')}</b>" | Đáp án chuẩn: <b style="color:var(--accent);">${esc(item.word)}</b>`;
+                }
+                feedbackEl.style.display = 'block';
+            });
+
+            $('btn-submit-test').style.display = 'none';
+            $('test-summary-box').style.display = 'block';
+            const scoreTitle = $('summary-score-title');
+            const subtext = $('summary-subtext');
+
+            if (correctCount === total) {
+                playSoundFile('win'); scoreTitle.style.color = 'var(--accent)';
+                scoreTitle.innerText = `🎉 ĐẠT ĐIỂM TUYỆT ĐỐI: ${total} / ${total}`;
+                subtext.style.color = 'var(--accent)';
+                subtext.innerText = "Hưng quá đỉnh! Hoàn thành trọn vẹn bài test không tì vết!";
+            } else {
+                playSoundFile('boo'); scoreTitle.style.color = 'var(--fire-red)';
+                scoreTitle.innerText = `Kết Quả: ${correctCount} / ${total}`;
+                subtext.style.color = 'var(--fire-gold)';
+                subtext.innerText = "Còn vài chỗ chưa ổn, xem kỹ lại lỗi sai phía dưới và phục thù nhé!";
+            }
+            $('panel-4').scrollTop = 0;
+        }
+
+        // ======================= STEP 5: ARENA ONLINE =======================
+        // Kiến trúc: chủ phòng (host) giữ toàn bộ trạng thái trận, bạn bè kết nối trực tiếp tới host qua WebRTC (PeerJS).
+        const PEER_PREFIX = 'trs6-arena-';
+        const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        const MAX_PLAYERS = 10;
+
+        const petsList = [
+            { id: 1, name: "Thỏ Hồng", emoji: "🐰" }, { id: 2, name: "Gà Vàng", emoji: "🐣" },
+            { id: 3, name: "Cá Sấu", emoji: "🐊" }, { id: 4, name: "Cáo Cam", emoji: "🦊" },
+            { id: 5, name: "Gấu Nâu", emoji: "🐻" }, { id: 6, name: "Mèo Tím", emoji: "🐱" },
+            { id: 7, name: "Cún Xanh", emoji: "🐶" }, { id: 8, name: "Gấu Trúc", emoji: "🐼" },
+            { id: 9, name: "Sư Tử", emoji: "🦁" }, { id: 10, name: "Ếch Xanh", emoji: "🐸" }
+        ];
+        const botNamesPool = ["An Đen", "Bảo Pro", "Chi Lee", "Dũng Ngơ", "Hải Đăng", "Khánh Vy", "Minh Tú", "Nam Phong", "Quỳnh Anh", "Tuấn Kiệt"];
+        const ARENA_SCREENS = ['arenaMenu', 'arenaLobby', 'arenaRace', 'arenaQuiz'];
+        const BOT_LEVELS = {
+            easy:   { label: 'Dễ',  lo: 0.06, hi: 0.10 },
+            normal: { label: 'Vừa', lo: 0.09, hi: 0.14 },
+            hard:   { label: 'Khó', lo: 0.13, hi: 0.20 }
+        };
+        const MODE_NAMES = { quiz: '🧠 Đấu Trí', race: '🏃 Đua Runner' };
+
+        const freshNet = () => ({ peer: null, active: false, isHost: false, local: false, myId: null, code: '', conns: {}, hostConn: null });
+        const freshRoom = () => ({ players: [], mode: 'quiz', setKey: 'session', setLabel: '', botLevel: 'normal', phase: 'lobby' });
+
+        let net = freshNet();
+        let room = freshRoom();
+        let me = { name: '', emoji: petsList[0].emoji };
+        let match = { words: [], total: 0, running: false, finished: false, finishCounter: 0, startHostTs: 0 };
+        let arenaScreen = 'arenaMenu';
+        let botTimer = null, countdownTimer = null;
+
+        // ---------- Trạng thái chơi cục bộ ----------
+        let score = 0, wordsCompleted = 0;
+        let gameSpeed = 3.8, frameCount = 0, invincibleFrames = 0;
+        let obstacles = [], isGameRunning = false;
+        let isPenalized = false, penaltyTimer = null, rafId = null;
+        let wordQueue = [], currentQuestionStep = 1, qWordObj = null;
+        const qz = { idx: 0, locked: false, startTs: 0, timer: null, penaltyTimer: null };
+
+        const player = { x: 100, y: 255, width: 45, height: 55, originalHeight: 55, velocityY: 0, gravity: 0.55, isJumping: false, isDucking: false };
+        const canvas = $('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // ---------- Tiện ích chung ----------
+        function getPlayer(id) { return room.players.find(p => p.id === id); }
+        function myPlayer() { return getPlayer(net.myId); }
+        function genCode() { let c = ''; for (let i = 0; i < 5; i++) c += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]; return c; }
+        function newPlayer(id, name, emoji, isBot, isHost) {
+            return { id, name, emoji, isBot, isHost, progress: 0, score: 0, finishOrder: 0, finishTime: 0, left: false, skill: 0 };
+        }
+        function rankCompare(a, b) {
+            const fa = a.finishOrder || 999, fb = b.finishOrder || 999;
+            if (fa !== fb) return fa - fb;
+            if (b.progress !== a.progress) return b.progress - a.progress;
+            return b.score - a.score;
+        }
+        function setMenuStatus(msg, isErr) {
+            const el = $('menuStatus');
+            el.innerText = msg || '';
+            el.className = 'menu-status' + (isErr ? ' err' : '');
+            el.style.display = msg ? 'block' : 'none';
+        }
+        function showArenaScreen(id) {
+            arenaScreen = id;
+            ARENA_SCREENS.forEach(s => { $(s).style.display = (s === id) ? 'flex' : 'none'; });
+        }
+        function peerOptions() {
+            const q = new URLSearchParams(location.search);
+            const base = { debug: 0, config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478' }] } };
+            if (q.get('peerhost')) {   // dùng cho kiểm thử với máy chủ PeerJS riêng
+                return Object.assign(base, { host: q.get('peerhost'), port: +q.get('peerport') || 9000, path: q.get('peerpath') || '/', secure: false });
+            }
+            return base;
+        }
+        function setOptions() {
+            return [
+                { key: 'session', label: `Day ${currentDay} · Ca ${currentSession} (${activeWords.length} từ)` },
+                { key: 'day', label: `Cả Day ${currentDay} (30 từ)` },
+                { key: 'mix20', label: 'Ngẫu nhiên 20 từ' },
+                { key: 'mix50', label: 'Ngẫu nhiên 50 từ' }
+            ];
+        }
+        function setLabelFor(key) { const o = setOptions().find(x => x.key === key); return o ? o.label : key; }
+        function wordsForSet(key) {
+            if (key === 'session') return activeWords.slice();
+            if (key === 'day') return rawVocabData.filter(w => w.day === currentDay);
+            if (key === 'mix20') return shuffle(rawVocabData).slice(0, 20);
+            return shuffle(rawVocabData).slice(0, 50);
+        }
+
+        // ---------- Menu: tạo / vào phòng ----------
+        function readName() {
+            const v = $('playerNameInput').value.trim();
+            if (!v) { setMenuStatus('Vui lòng nhập tên của bạn trước nhé!', true); $('playerNameInput').focus(); return null; }
+            me.name = v;
+            try { localStorage.setItem('trs6_player_name', v); } catch (e) {}
+            return v;
+        }
+
+        function createRoom(local) {
+            if (net.active || !readName()) return;
+            if (!local && typeof Peer === 'undefined') {
+                setMenuStatus('Không tải được thư viện kết nối online (kiểm tra Internet). Bạn vẫn có thể chơi Solo với Bot.', true);
+                return;
+            }
+            net = freshNet(); net.active = true; net.isHost = true; net.local = !!local;
+            room = freshRoom(); room.setLabel = setLabelFor(room.setKey);
+            if (local) {
+                net.myId = 'host'; net.code = 'SOLO';
+                room.players.push(newPlayer(net.myId, me.name, me.emoji, false, true));
+                enterLobby();
+                return;
+            }
+            setMenuStatus('Đang tạo phòng...');
+            tryCreatePeer(0);
+        }
+
+        function tryCreatePeer(attempt) {
+            if (!net.active) return;
+            if (attempt > 5) { setMenuStatus('Không tạo được phòng, vui lòng thử lại sau.', true); leaveRoom(); return; }
+            const code = genCode();
+            let opened = false;
+            const peer = new Peer(PEER_PREFIX + code, peerOptions());
+            net.peer = peer;
+            peer.on('open', id => {
+                opened = true; net.myId = id; net.code = code;
+                room.players.push(newPlayer(net.myId, me.name, me.emoji, false, true));
+                setMenuStatus('');
+                enterLobby();
+            });
+            peer.on('connection', conn => setupHostConn(conn));
+            peer.on('error', err => {
+                if (!net.active || net.peer !== peer) return;
+                if (err.type === 'unavailable-id' && !opened) { try { peer.destroy(); } catch (e) {} tryCreatePeer(attempt + 1); return; }
+                if (!opened) { setMenuStatus('Lỗi kết nối: ' + (err.type || err.message), true); leaveRoom(); }
+                else console.warn('Peer error', err);
+            });
+            peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
+        }
+
+        function joinRoom() {
+            if (net.active || !readName()) return;
+            const code = $('roomCodeInput').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (code.length < 4) { setMenuStatus('Nhập mã phòng do chủ phòng gửi cho bạn nhé!', true); $('roomCodeInput').focus(); return; }
+            if (typeof Peer === 'undefined') { setMenuStatus('Không tải được thư viện kết nối online (kiểm tra Internet).', true); return; }
+
+            net = freshNet(); net.active = true; net.code = code;
+            room = freshRoom();
+            setMenuStatus('Đang tìm phòng ' + code + '...');
+            let joined = false;
+            const peer = new Peer(peerOptions());
+            net.peer = peer;
+            const fail = (msg) => { if (joined || !net.active || net.peer !== peer) return; setMenuStatus(msg, true); leaveRoom(); };
+            const timer = setTimeout(() => fail('Không tìm thấy phòng ' + code + '. Kiểm tra lại mã hoặc kết nối mạng.'), 12000);
+
+            peer.on('open', () => {
+                const conn = peer.connect(PEER_PREFIX + code, { reliable: true });
+                net.hostConn = conn;
+                conn.on('open', () => conn.send({ t: 'join', name: me.name, emoji: me.emoji }));
+                conn.on('data', msg => clientHandle(msg, () => { joined = true; clearTimeout(timer); }));
+                conn.on('close', () => {
+                    clearTimeout(timer);
+                    if (!net.active || net.peer !== peer) return;
+                    if (!joined) fail('Không vào được phòng.');
+                    else { alert('Chủ phòng đã rời hoặc mất kết nối. Phòng đã đóng.'); backToMenu(); }
+                });
+            });
+            peer.on('error', err => {
+                clearTimeout(timer);
+                if (!net.active || net.peer !== peer) return;
+                if (err.type === 'peer-unavailable') fail('Không tìm thấy phòng ' + code + '. Kiểm tra lại mã!');
+                else if (!joined) fail('Lỗi kết nối: ' + (err.type || err.message));
+            });
+        }
+
+        function leaveRoom() {
+            net.active = false;
+            stopBots(); stopLocalPlay();
+            try { Object.values(net.conns).forEach(c => c.close()); } catch (e) {}
+            try { if (net.hostConn) net.hostConn.close(); } catch (e) {}
+            try { if (net.peer) net.peer.destroy(); } catch (e) {}
+            net = freshNet(); room = freshRoom();
+        }
+        function backToMenu() {
+            leaveRoom();
+            $('leaderboardModal').style.display = 'none';
+            stopEndingAudio();
+            showArenaScreen('arenaMenu');
+            setMusic('lobby');
+        }
+        function leaveRoomUI() { backToMenu(); setMenuStatus(''); }
+        window.addEventListener('beforeunload', () => { try { if (net.peer) net.peer.destroy(); } catch (e) {} });
+
+        // ---------- Mạng: host ----------
+        function publicRoom() {
+            return {
+                players: room.players.map(p => ({ id: p.id, name: p.name, emoji: p.emoji, isBot: p.isBot, isHost: p.isHost, progress: p.progress, score: p.score, finishOrder: p.finishOrder, finishTime: p.finishTime, left: p.left })),
+                mode: room.mode, setKey: room.setKey, setLabel: room.setLabel, botLevel: room.botLevel, phase: room.phase
+            };
+        }
+        function broadcast(msg) { Object.values(net.conns).forEach(c => { try { if (c.open) c.send(msg); } catch (e) {} }); }
+        function broadcastRoom() { broadcast({ t: 'room', room: publicRoom() }); refreshView(); }
+        function sendToHost(msg) { try { if (net.hostConn && net.hostConn.open) net.hostConn.send(msg); } catch (e) {} }
+        function refreshView() {
+            if (arenaScreen === 'arenaLobby') renderLobby();
+            else if (arenaScreen === 'arenaRace' || arenaScreen === 'arenaQuiz') updateLanes();
+        }
+
+        function setupHostConn(conn) {
+            conn.on('data', msg => hostHandle(conn, msg));
+            conn.on('close', () => removePlayerById(conn.peer));
+            conn.on('error', () => removePlayerById(conn.peer));
+        }
+        function denyConn(conn, reason) {
+            try { conn.send({ t: 'denied', reason }); } catch (e) {}
+            setTimeout(() => { try { conn.close(); } catch (e) {} }, 300);
+        }
+        function hostHandle(conn, msg) {
+            if (!net.active || !msg || typeof msg !== 'object') return;
+            const id = conn.peer;
+            if (msg.t === 'join') {
+                if (getPlayer(id)) return;
+                if (room.phase !== 'lobby') return denyConn(conn, 'Phòng đang trong trận đấu, hãy chờ trận sau nhé!');
+                if (room.players.length >= MAX_PLAYERS) return denyConn(conn, 'Phòng đã đầy (10/10 người)!');
+                const name = String(msg.name || 'Người chơi').trim().slice(0, 15) || 'Người chơi';
+                const free = e => petsList.some(x => x.emoji === e) && !room.players.some(p => p.emoji === e);
+                const emoji = free(msg.emoji) ? msg.emoji : petsList.find(x => free(x.emoji)).emoji;
+                net.conns[id] = conn;
+                room.players.push(newPlayer(id, name, emoji, false, false));
+                conn.send({ t: 'welcome', id });
+                broadcastRoom();
+            } else if (msg.t === 'pet') {
+                const p = getPlayer(id);
+                if (!p || room.phase !== 'lobby') return;
+                const ok = petsList.some(x => x.emoji === msg.emoji) && !room.players.some(x => x.id !== id && x.emoji === msg.emoji);
+                if (ok) { p.emoji = msg.emoji; broadcastRoom(); }
+            } else if (msg.t === 'progress') {
+                applyProgress(id, msg);
+            }
+        }
+        function removePlayerById(id) {
+            const p = getPlayer(id);
+            if (!p || p.isBot || p.isHost) return;
+            delete net.conns[id];
+            if (room.phase === 'playing') { p.left = true; broadcastRoom(); }
+            else { room.players = room.players.filter(x => x.id !== id); broadcastRoom(); }
+        }
+
+        // ---------- Mạng: client ----------
+        function clientHandle(msg, markJoined) {
+            if (!net.active || !msg || typeof msg !== 'object') return;
+            if (msg.t === 'welcome') { net.myId = msg.id; markJoined(); }
+            else if (msg.t === 'room') {
+                room = msg.room;
+                if (arenaScreen === 'arenaMenu') { setMenuStatus(''); enterLobby(); } else refreshView();
+            }
+            else if (msg.t === 'start') { room = msg.room; beginMatch(msg.mode, msg.wordIds); }
+            else if (msg.t === 'end') { room = msg.room; showResults(msg.ranking); }
+            else if (msg.t === 'toLobby') { room = msg.room; $('leaderboardModal').style.display = 'none'; stopEndingAudio(); enterLobby(); }
+            else if (msg.t === 'denied') { markJoined(); const r = msg.reason || 'Không vào được phòng.'; backToMenu(); setMenuStatus(r, true); }
+            else if (msg.t === 'kicked') { alert('Bạn đã bị chủ phòng mời ra khỏi phòng.'); backToMenu(); }
+        }
+
+        // ---------- Sảnh chờ ----------
+        function enterLobby() {
+            stopLocalPlay();
+            showArenaScreen('arenaLobby');
+            setMusic('lobby');
+            renderLobby();
+        }
+
+        function fillSelect(sel, pairs, value) {
+            sel.innerHTML = pairs.map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join('');
+            sel.value = value;
+        }
+
+        function renderLobby() {
+            if (!net.active || arenaScreen !== 'arenaLobby') return;
+            const isHost = net.isHost;
+            const hostP = room.players.find(p => p.isHost);
+            $('lobbyCode').innerText = net.local ? 'SOLO' : net.code;
+            $('btnCopyCode').style.display = net.local ? 'none' : 'inline-flex';
+            $('lobbyHint').innerText = net.local ? 'Chế độ Solo — chơi với Bot, không cần Internet.'
+                : (isHost ? 'Gửi mã này cho bạn bè, họ nhập vào ô "Vào phòng" là chơi được ngay.' : `Bạn đang ở phòng của ${hostP ? hostP.name : 'chủ phòng'}.`);
+            $('lobbyCount').innerText = `${room.players.length}/${MAX_PLAYERS}`;
+
+            $('playersListGrid').innerHTML = room.players.map(p => `
+                <div class="player-card ${p.id === net.myId ? 'is-me' : ''}">
+                    <span class="pc-emoji">${p.emoji}</span>
+                    <div class="pc-info">
+                        <div class="pc-name">${esc(p.name)}${p.id === net.myId ? ' (Bạn)' : ''}</div>
+                        <div class="pc-tags">
+                            ${p.isHost ? '<span class="tag tag-host">👑 Chủ phòng</span>' : ''}
+                            ${p.isBot ? '<span class="tag tag-bot">🤖 Bot</span>' : '<span class="tag tag-ok">✓ Sẵn sàng</span>'}
+                        </div>
+                    </div>
+                    ${isHost && !p.isHost ? `<button class="pc-kick" title="Mời ra khỏi phòng" data-kick="${esc(p.id)}">✕</button>` : ''}
+                </div>`).join('');
+
+            ['quiz', 'race'].forEach(m => {
+                const el = $('modeCard-' + m);
+                el.classList.toggle('active', room.mode === m);
+                el.classList.toggle('locked', !isHost);
+            });
+            fillSelect($('setSelect'), isHost ? setOptions().map(o => [o.key, o.label]) : [[room.setKey, room.setLabel]], room.setKey);
+            fillSelect($('botSelect'), Object.entries(BOT_LEVELS).map(([k, v]) => [k, v.label]), room.botLevel);
+            $('setSelect').disabled = !isHost; $('botSelect').disabled = !isHost;
+
+            const mine = myPlayer();
+            if (mine) me.emoji = mine.emoji;
+            const takenByOthers = room.players.filter(p => p.id !== net.myId).map(p => p.emoji);
+            $('petGrid').innerHTML = petsList.map((pet, idx) => {
+                const taken = takenByOthers.includes(pet.emoji);
+                const sel = mine && mine.emoji === pet.emoji;
+                return `<div class="pet-card ${taken ? 'taken' : ''} ${sel ? 'selected' : ''}" ${taken ? '' : `data-pet="${idx}"`}><div class="pe">${pet.emoji}</div><div class="pn">${pet.name}</div></div>`;
+            }).join('');
+
+            $('btnAddBot').style.display = isHost ? 'inline-flex' : 'none';
+            $('btnAddBot').disabled = room.players.length >= MAX_PLAYERS;
+            $('btnStart').style.display = isHost ? 'inline-flex' : 'none';
+            $('btnStart').disabled = room.players.length < 2;
+            $('startHint').innerText = (isHost && room.players.length < 2) ? 'Cần ít nhất 2 người chơi: hãy thêm Bot hoặc chờ bạn bè vào phòng.' : '';
+            $('lobbyWait').style.display = isHost ? 'none' : 'block';
+        }
+
+        $('playersListGrid').addEventListener('click', e => {
+            const b = e.target.closest('[data-kick]');
+            if (b) kickPlayer(b.dataset.kick);
+        });
+        $('petGrid').addEventListener('click', e => {
+            const c = e.target.closest('[data-pet]');
+            if (c) pickPet(petsList[+c.dataset.pet].emoji);
+        });
+
+        function pickPet(emoji) {
+            if (room.players.some(p => p.id !== net.myId && p.emoji === emoji)) return;
+            me.emoji = emoji;
+            if (net.isHost) { const p = myPlayer(); if (p) p.emoji = emoji; broadcastRoom(); }
+            else sendToHost({ t: 'pet', emoji });
+        }
+        function hostSetMode(m) { if (!net.isHost || room.phase !== 'lobby') return; room.mode = m; broadcastRoom(); }
+        function hostSetSet(k) { if (!net.isHost || room.phase !== 'lobby') return; room.setKey = k; room.setLabel = setLabelFor(k); broadcastRoom(); }
+        function hostSetBot(l) { if (!net.isHost || room.phase !== 'lobby') return; room.botLevel = l; broadcastRoom(); }
+        function addBotPlayer() {
+            if (!net.isHost || room.phase !== 'lobby') return;
+            if (room.players.length >= MAX_PLAYERS) { alert('Phòng đã đạt tối đa 10 người chơi!'); return; }
+            const name = botNamesPool.find(n => !room.players.some(p => p.name === n)) || ('Bot ' + room.players.length);
+            const pet = petsList.find(x => !room.players.some(p => p.emoji === x.emoji));
+            room.players.push(newPlayer('bot-' + Math.random().toString(36).slice(2, 8), name, pet.emoji, true, false));
+            broadcastRoom();
+        }
+        function kickPlayer(id) {
+            if (!net.isHost || room.phase !== 'lobby') return;
+            const p = getPlayer(id);
+            if (!p || p.isHost) return;
+            const c = net.conns[id];
+            if (c) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 200); }
+            delete net.conns[id];
+            room.players = room.players.filter(x => x.id !== id);
+            broadcastRoom();
+        }
+        function copyRoomCode() {
+            const code = net.code, btn = $('btnCopyCode');
+            const done = () => { btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã sao chép'; setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i> Sao chép mã'; }, 1500); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done).catch(() => prompt('Sao chép mã phòng:', code));
+            else prompt('Sao chép mã phòng:', code);
+        }
+
+        // ---------- Bắt đầu / kết thúc trận (host) ----------
+        function hostStart() {
+            if (!net.isHost || room.phase !== 'lobby') return;
+            if (room.players.length < 2) { alert('Cần ít nhất 2 người chơi — hãy thêm Bot hoặc chờ bạn bè vào phòng!'); return; }
+            const wordIds = shuffle(wordsForSet(room.setKey)).map(w => w.id);
+            room.players.forEach(p => { p.progress = 0; p.score = 0; p.finishOrder = 0; p.finishTime = 0; p.left = false; });
+            room.phase = 'playing';
+            broadcast({ t: 'start', mode: room.mode, wordIds, room: publicRoom() });
+            beginMatch(room.mode, wordIds);
+        }
+
+        function applyProgress(id, msg) {
+            if (room.phase !== 'playing') return;
+            const p = getPlayer(id);
+            if (!p || p.finishOrder) return;
+            p.progress = Math.max(p.progress, Math.min(match.total, msg.progress | 0));
+            p.score = Math.max(0, msg.score | 0);
+            if (p.progress >= match.total) { p.finishOrder = ++match.finishCounter; p.finishTime = match.startHostTs ? Date.now() - match.startHostTs : 0; }
+            broadcastRoom();
+            checkEnd();
+        }
+        function checkEnd() { if (room.phase === 'playing' && room.players.some(p => p.finishOrder)) endMatch(); }
+        function hostForceEnd() { if (net.isHost && room.phase === 'playing' && confirm('Kết thúc trận đấu ngay bây giờ?')) endMatch(); }
+
+        function endMatch() {
+            if (room.phase !== 'playing') return;
+            room.phase = 'ended';
+            stopBots();
+            const ranking = room.players.slice().sort(rankCompare).map(p => ({ id: p.id, name: p.name, emoji: p.emoji, isBot: p.isBot, progress: p.progress, score: p.score, finishOrder: p.finishOrder, finishTime: p.finishTime, left: p.left }));
+            broadcast({ t: 'end', ranking, room: publicRoom() });
+            showResults(ranking);
+        }
+
+        function hostBackToLobby(rematch) {
+            if (!net.isHost) return;
+            room.players = room.players.filter(p => !p.left);
+            room.players.forEach(p => { p.progress = 0; p.score = 0; p.finishOrder = 0; p.finishTime = 0; });
+            room.phase = 'lobby';
+            $('leaderboardModal').style.display = 'none';
+            stopEndingAudio();
+            if (rematch && room.players.length >= 2) { hostStart(); return; }
+            broadcast({ t: 'toLobby', room: publicRoom() });
+            enterLobby();
+        }
+
+        // ---------- Bot (do host mô phỏng) ----------
+        function startBots() {
+            stopBots();
+            const lv = BOT_LEVELS[room.botLevel] || BOT_LEVELS.normal;
+            const mult = room.mode === 'quiz' ? 1.8 : 1;
+            room.players.filter(p => p.isBot).forEach(b => { b.skill = (lv.lo + Math.random() * (lv.hi - lv.lo)) * mult; });
+            botTimer = setInterval(() => {
+                if (room.phase !== 'playing' || !match.running) return;
+                let changed = false;
+                room.players.forEach(b => {
+                    if (!b.isBot || b.finishOrder) return;
+                    if (Math.random() < b.skill) {
+                        b.progress++; b.score += (room.mode === 'quiz' ? 10 : 25); changed = true;
+                        if (b.progress >= match.total) { b.finishOrder = ++match.finishCounter; b.finishTime = Date.now() - match.startHostTs; }
+                    }
+                });
+                if (changed) { broadcastRoom(); checkEnd(); }
+            }, 1000);
+        }
+        function stopBots() { if (botTimer) { clearInterval(botTimer); botTimer = null; } }
+
+        // ---------- Vào trận ----------
+        function beginMatch(mode, wordIds) {
+            room.mode = mode;
+            match = { words: wordIds.map(id => rawVocabData.find(w => w.id === id)).filter(Boolean), total: 0, running: false, finished: false, finishCounter: 0, startHostTs: 0 };
+            match.total = match.words.length;
+            $('leaderboardModal').style.display = 'none';
+            stopEndingAudio();
+            resetLocalGame();
+            showArenaScreen(mode === 'race' ? 'arenaRace' : 'arenaQuiz');
+            document.querySelectorAll('.host-only').forEach(el => { el.style.display = net.isHost ? '' : 'none'; });
+            renderLanes();
+            setMusic('bgm');
+            runCountdown(() => {
+                match.running = true;
+                if (net.isHost) { match.startHostTs = Date.now(); startBots(); }
+                if (mode === 'race') { isGameRunning = true; rafId = requestAnimationFrame(updateGame); }
+                else startQuiz();
+            });
+        }
+
+        function runCountdown(done) {
+            let n = 3;
+            const modal = $('countdownModal'), num = $('countdownNum');
+            const show = txt => { num.innerText = txt; num.style.animation = 'none'; void num.offsetHeight; num.style.animation = ''; };
+            modal.style.display = 'flex'; show(n);
+            countdownTimer = setInterval(() => {
+                n--;
+                if (n > 0) show(n);
+                else if (n === 0) show('GO!');
+                else { clearInterval(countdownTimer); countdownTimer = null; modal.style.display = 'none'; done(); }
+            }, 900);
+        }
+
+        function resetLocalGame() {
+            stopLocalPlay();
+            score = 0; wordsCompleted = 0; gameSpeed = 3.8; frameCount = 0; invincibleFrames = 0;
+            obstacles = []; wordQueue = shuffle(match.words);
+            player.x = 100; player.y = 255; player.velocityY = 0; player.isJumping = false; standPlayer();
+            qz.idx = 0; qz.locked = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            $('qz-done').style.display = 'none'; $('qz-body').style.display = 'block';
+            $('qz-time').innerText = '0.0s';
+        }
+
+        function stopLocalPlay() {
+            isGameRunning = false;
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            if (penaltyTimer) { clearInterval(penaltyTimer); penaltyTimer = null; }
+            if (qz.timer) { clearInterval(qz.timer); qz.timer = null; }
+            if (qz.penaltyTimer) { clearInterval(qz.penaltyTimer); qz.penaltyTimer = null; }
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            isPenalized = false; qz.locked = false;
+            ['questionModal', 'countdownModal'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
+            const qb = $('qz-body'); if (qb) qb.style.pointerEvents = 'auto';
+        }
+
+        // ---------- Đường đua chung (cả 2 chế độ) ----------
+        function laneBar() { return $(room.mode === 'race' ? 'laneBarRace' : 'laneBarQuiz'); }
+        function renderLanes() {
+            ['laneBarRace', 'laneBarQuiz'].forEach(id => $(id).querySelectorAll('.race-racer-row').forEach(el => el.remove()));
+            const bar = laneBar();
+            const n = room.players.length;
+            const rowH = Math.max(17, Math.min(34, Math.floor(170 / n)));
+            bar.style.height = (n * rowH + 12) + 'px';
+            room.players.forEach((p, idx) => {
+                const row = document.createElement('div');
+                row.className = 'race-racer-row' + (p.id === net.myId ? ' is-me' : '');
+                row.style.top = (6 + idx * rowH) + 'px';
+                row.style.height = rowH + 'px';
+                row.innerHTML = `<div class="race-racer-icon ${p.id === net.myId ? 'is-user' : ''}" id="racer-icon-${idx}" style="left:4%;">${p.emoji}<span class="rn">${esc(p.name)}</span></div>`;
+                bar.appendChild(row);
+            });
+            updateLanes();
+        }
+        function updateLanes() {
+            const bar = laneBar();
+            if (bar.querySelectorAll('.race-racer-row').length !== room.players.length) { renderLanes(); return; }
+            const total = match.total || 1;
+            room.players.forEach((p, idx) => {
+                const el = $(`racer-icon-${idx}`);
+                if (el) { el.style.left = `${4 + (Math.min(p.progress, total) / total) * 82}%`; el.style.opacity = p.left ? 0.35 : 1; }
+            });
+            updateHud();
+        }
+        function updateHud() {
+            const sorted = room.players.slice().sort(rankCompare);
+            const rank = Math.max(1, sorted.findIndex(p => p.id === net.myId) + 1);
+            const rankTxt = `#${rank}/${sorted.length}`;
+            $('hud-progress').innerText = `${wordsCompleted} / ${match.total} từ`;
+            $('hud-score').innerText = `${score} đ`;
+            $('hud-rank').innerText = rankTxt;
+            $('qz-score').innerText = `${score} đ`;
+            $('qz-rank').innerText = rankTxt;
+        }
+        function reportProgress() {
+            const msg = { t: 'progress', progress: wordsCompleted, score };
+            const mp = myPlayer();
+            if (mp) { mp.progress = wordsCompleted; mp.score = score; }
+            if (net.isHost) applyProgress(net.myId, msg); else sendToHost(msg);
+            updateLanes();
+        }
+
+        // ======================= CHẾ ĐỘ ĐẤU TRÍ =======================
+        function quizType(i) { return i % 2 === 0 ? 'quiz' : 'write'; }
+
+        function startQuiz() {
+            qz.idx = 0; qz.locked = false; qz.startTs = performance.now();
+            if (qz.timer) clearInterval(qz.timer);
+            qz.timer = setInterval(() => { $('qz-time').innerText = ((performance.now() - qz.startTs) / 1000).toFixed(1) + 's'; }, 100);
+            $('qz-done').style.display = 'none'; $('qz-body').style.display = 'block';
+            quizRender();
+        }
+
+        function quizRender() {
+            if (match.finished || !match.running) return;
+            const item = match.words[qz.idx];
+            const type = quizType(qz.idx);
+            $('qz-count').innerText = `Câu ${qz.idx + 1}/${match.total}`;
+            $('qz-penalty').style.display = 'none';
+            if (type === 'quiz') {
+                $('qz-mode-tag').innerText = '📝 TRẮC NGHIỆM — chọn nghĩa đúng';
+                $('qz-quiz-box').style.display = 'block'; $('qz-write-box').style.display = 'none';
+                $('qz-word').innerText = item.word;
+                buildOptions($('qz-options'), item.meaning, allMeanings(), ok => quizAnswer(ok));
+            } else {
+                $('qz-mode-tag').innerText = '✍️ VIẾT TỪ — gõ từ tiếng Anh tương ứng';
+                $('qz-quiz-box').style.display = 'none'; $('qz-write-box').style.display = 'block';
+                $('qz-write-meaning').innerText = item.meaning;
+                const inp = $('qz-write-input');
+                inp.disabled = false; inp.value = '';
+                setTimeout(() => inp.focus(), 30);
+            }
+        }
+
+        function handleQzWriteKey(e) { if (e.key === 'Enter') quizCheckWrite(); }
+        function quizCheckWrite() {
+            if (!match.running || match.finished || qz.locked) return;
+            const val = $('qz-write-input').value.trim().toLowerCase();
+            quizAnswer(val === match.words[qz.idx].word.toLowerCase());
+        }
+
+        function quizAnswer(ok) {
+            if (!match.running || match.finished || qz.locked) return;
+            if (ok) {
+                score += 10; qz.idx++; wordsCompleted = qz.idx;
+                playSoundFile('clap');
+                const card = $('qz-card');
+                card.classList.add('flash-ok'); setTimeout(() => card.classList.remove('flash-ok'), 350);
+                if (qz.idx >= match.total) {
+                    match.finished = true;
+                    if (qz.timer) { clearInterval(qz.timer); qz.timer = null; }
+                    $('qz-body').style.display = 'none'; $('qz-done').style.display = 'block';
+                    reportProgress();
+                } else {
+                    reportProgress();
+                    if (room.phase !== 'ended') quizRender();
+                }
+            } else {
+                quizWrong();
+            }
+        }
+
+        function quizWrong() {
+            qz.locked = true;
+            playSoundFile('laugh');
+            let s = 3;
+            $('qz-penalty').style.display = 'block'; $('qz-penalty-sec').innerText = s;
+            $('qz-body').style.pointerEvents = 'none'; $('qz-write-input').disabled = true;
+            qz.penaltyTimer = setInterval(() => {
+                s--;
+                $('qz-penalty-sec').innerText = Math.max(s, 0);
+                if (s <= 0) {
+                    clearInterval(qz.penaltyTimer); qz.penaltyTimer = null;
+                    qz.locked = false;
+                    $('qz-body').style.pointerEvents = 'auto';
+                    quizRender();
+                }
+            }, 1000);
+        }
+
+        // ======================= CHẾ ĐỘ ĐUA RUNNER =======================
+        window.addEventListener('keydown', (e) => {
+            if (currentStep !== 5 || !isGameRunning || isPenalized) return;
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                if (!player.isJumping) { player.velocityY = -12.5; player.isJumping = true; standPlayer(); }
+            } else if (e.code === 'ArrowDown') {
+                e.preventDefault();
+                duckPlayer();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (currentStep === 5 && e.code === 'ArrowDown') standPlayer();
+        });
+
+        function duckPlayer() { if (!player.isDucking) { player.isDucking = true; player.height = 38; player.y = 272; } }
+        function standPlayer() {
+            player.isDucking = false;
+            player.height = player.originalHeight;
+            if (!player.isJumping) player.y = 255;
+        }
+        function spawnObstacle() {
+            if (Math.random() < 0.4) obstacles.push({ x: 1000, y: 195, width: 40, height: 30, emoji: "🦅", type: "air" });
+            else obstacles.push({ x: 1000, y: 260, width: 35, height: 50, emoji: "🌵", type: "ground" });
+        }
+
+        function updateGame() {
+            if (!isGameRunning) return;
+            frameCount++;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (frameCount % 400 === 0 && gameSpeed < 9) gameSpeed += 0.3;
+
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(0, 310, canvas.width, 40);
+            ctx.strokeStyle = "#F59E0B"; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(0, 310); ctx.lineTo(canvas.width, 310); ctx.stroke();
+
+            if (player.isJumping) {
+                if (player.velocityY < 0 && player.velocityY > -4) player.velocityY += player.gravity * 0.5;
+                else player.velocityY += player.gravity;
+            }
+            player.y += player.velocityY;
+            if (player.y >= 255 && !player.isDucking) { player.y = 255; player.velocityY = 0; player.isJumping = false; }
+
+            const blink = invincibleFrames > 0 && Math.floor(frameCount / 6) % 2 === 0;
+            if (!blink) {
+                ctx.fillStyle = "#F59E0B";
+                ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(me.name, player.x + 20, player.y - 8);
+                ctx.font = `${player.isDucking ? '34px' : '42px'} 'Plus Jakarta Sans', sans-serif`;
+                ctx.fillText(me.emoji, player.x, player.y + (player.isDucking ? 28 : 38));
+            }
+
+            if (frameCount % Math.max(90, Math.floor(190 - gameSpeed * 8)) === 0) spawnObstacle();
+            if (invincibleFrames > 0) invincibleFrames--;
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.x -= gameSpeed;
+                ctx.font = "34px 'Plus Jakarta Sans', sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(obs.emoji, obs.x, obs.y + 35);
+
+                if (invincibleFrames <= 0 &&
+                    player.x + 8 < obs.x + obs.width - 5 &&
+                    player.x + player.width - 8 > obs.x + 5 &&
+                    player.y < obs.y + obs.height - 5 &&
+                    player.y + player.height > obs.y + 5) {
+                    obstacles.splice(i, 1);
+                    triggerCollisionQuestion();
+                    return;
+                }
+                if (obs.x < -50) obstacles.splice(i, 1);
+            }
+            rafId = requestAnimationFrame(updateGame);
+        }
+
+        function nextQuestionWord() {
+            if (wordQueue.length === 0) wordQueue = shuffle(match.words);
+            return wordQueue.shift();
+        }
+
+        function triggerCollisionQuestion() {
+            isGameRunning = false;
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            standPlayer();
+            currentQuestionStep = 1;
+            qWordObj = nextQuestionWord();
+            $('penalty-notice').style.display = 'none';
+            $('q-quiz-view').style.pointerEvents = 'auto';
+            $('q-write-view').style.pointerEvents = 'auto';
+            $('q-write-input').disabled = false;
+            $('questionModal').style.display = 'flex';
+            renderQuestionStep();
+        }
+
+        function renderQuestionStep() {
+            $('q-step-tag').innerText = `CÂU HỎI CẤP CỨU (${currentQuestionStep}/2)`;
+            if (currentQuestionStep === 1) {
+                $('q-quiz-view').style.display = 'block';
+                $('q-write-view').style.display = 'none';
+                $('q-word-title').innerText = qWordObj.word;
+                buildOptions($('q-quiz-options'), qWordObj.meaning, allMeanings(), ok => checkQQuizAnswer(ok));
+            } else {
+                $('q-quiz-view').style.display = 'none';
+                $('q-write-view').style.display = 'block';
+                $('q-write-meaning').innerText = qWordObj.meaning;
+                $('q-write-input').value = '';
+                setTimeout(() => $('q-write-input').focus(), 50);
+            }
+        }
+
+        function checkQQuizAnswer(ok) {
+            if (isPenalized) return;
+            if (ok) {
+                score += 10; updateHud();
+                playSoundFile('clap');
+                currentQuestionStep = 2;
+                renderQuestionStep();
+            } else {
+                handleWrongAnswerPenalty();
+            }
+        }
+
+        function handleQWriteKey(e) { if (e.key === 'Enter') checkQWriteAnswer(); }
+
+        function checkQWriteAnswer() {
+            if (isPenalized) return;
+            const val = $('q-write-input').value.trim().toLowerCase();
+            if (val !== qWordObj.word.toLowerCase()) { handleWrongAnswerPenalty(); return; }
+
+            score += 15; wordsCompleted++;
+            playSoundFile('clap');
+            $('questionModal').style.display = 'none';
+
+            if (wordsCompleted >= match.total) {
+                match.finished = true; isGameRunning = false;
+                if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+                reportProgress();
+                return;
+            }
+            player.x += 15;
+            invincibleFrames = 90;          // bất tử ngắn để không bị hỏi liên tiếp
+            isGameRunning = true;
+            rafId = requestAnimationFrame(updateGame);
+            reportProgress();
+        }
+
+        function handleWrongAnswerPenalty() {
+            if (isPenalized) return;
+            isPenalized = true;
+            playSoundFile('laugh');
+            let secondsLeft = 5;
+            $('penalty-notice').style.display = 'block';
+            $('countdownTimer').innerText = secondsLeft;
+            $('q-quiz-view').style.pointerEvents = 'none';
+            $('q-write-view').style.pointerEvents = 'none';
+            $('q-write-input').disabled = true;
+            wordQueue.push(qWordObj);       // từ sai được xếp lại cuối hàng để gặp lại
+
+            penaltyTimer = setInterval(() => {
+                secondsLeft--;
+                $('countdownTimer').innerText = Math.max(secondsLeft, 0);
+                if (secondsLeft <= 0) {
+                    clearInterval(penaltyTimer); penaltyTimer = null;
+                    isPenalized = false;
+                    $('q-quiz-view').style.pointerEvents = 'auto';
+                    $('q-write-view').style.pointerEvents = 'auto';
+                    $('q-write-input').disabled = false;
+                    $('penalty-notice').style.display = 'none';
+                    currentQuestionStep = 1;
+                    qWordObj = nextQuestionWord();
+                    renderQuestionStep();
+                }
+            }, 1000);
+        }
+
+        // ======================= KẾT QUẢ =======================
+        function showResults(ranking) {
+            stopLocalPlay();
+            match.running = false;
+            setMusic(null);
+
+            const n = ranking.length;
+            const rank = ranking.findIndex(r => r.id === net.myId) + 1;
+            const medals = ['🥇', '🥈', '🥉'];
+            if (rank === 1) {
+                $('rankBadgeIcon').innerText = "🥇🏆";
+                $('rankSubtitleText').innerText = "CHAMPION! BẠN LÀ SỐ MỘT!";
+                playEnding('champion');
+            } else if (rank <= Math.ceil(n / 2)) {
+                $('rankBadgeIcon').innerText = "🥈🔥";
+                $('rankSubtitleText').innerText = `QUÁ ĐỈNH! BẠN VỀ HẠNG #${rank}!`;
+                playEnding('normal');
+            } else {
+                $('rankBadgeIcon').innerText = "🗿💀";
+                $('rankSubtitleText').innerText = `SKIBIDI RIZZ! BẠN VỀ HẠNG #${rank}`;
+                playEnding('skibidi');
+            }
+            $('rankModeLine').innerText = `${MODE_NAMES[room.mode] || ''} · ${room.setLabel || ''}`;
+            $('rankList').innerHTML = ranking.map((p, i) => `
+                <div class="rank-item ${p.id === net.myId ? 'me' : ''}">
+                    <div style="font-weight:800; text-align:left;">
+                        ${medals[i] || '#' + (i + 1)} ${p.emoji} ${esc(p.name)}${p.id === net.myId ? ' (Bạn)' : ''}${p.isBot ? ' 🤖' : ''}${p.left ? ' (đã rời)' : ''}
+                    </div>
+                    <div class="rank-stats">${p.progress}/${match.total} · ${p.score}đ${p.finishTime ? ` · ⏱ ${(p.finishTime / 1000).toFixed(1)}s` : ''}</div>
+                </div>`).join('');
+            $('resHostBtns').style.display = net.isHost ? 'flex' : 'none';
+            $('resGuestBtns').style.display = net.isHost ? 'none' : 'block';
+            $('leaderboardModal').style.display = 'flex';
+        }
+
+        // ======================= VÀO / RỜI BƯỚC 5 =======================
+        function initStep5Arena() {
+            ['questionModal', 'leaderboardModal', 'countdownModal'].forEach(id => { $(id).style.display = 'none'; });
+            try { const saved = localStorage.getItem('trs6_player_name'); if (saved && !$('playerNameInput').value) $('playerNameInput').value = saved; } catch (e) {}
+            showArenaScreen('arenaMenu');
+            setMusic('lobby');
+            if (typeof Peer === 'undefined') setMenuStatus('⚠️ Không tải được thư viện online (kiểm tra Internet). Bạn vẫn có thể chơi Solo với Bot.', true);
+            else setMenuStatus('');
+        }
+
+        function leaveArena() {
+            if (net.active) leaveRoom();
+            stopLocalPlay();
+            ['questionModal', 'leaderboardModal', 'countdownModal'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
+            setMusic(null);
+        }
+        function confirmLeaveArena() {
+            if (currentStep === 5 && net.active) return confirm('Bạn đang ở trong phòng đấu. Rời phòng?');
+            return true;
+        }
+
+        $('roomCodeInput').addEventListener('keypress', e => { if (e.key === 'Enter') joinRoom(); });
+        $('roomCodeInput').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+
+// ======================= KHỞI CHẠY =======================
+        initSidebar();
+        startSession(1, 1);
+    </script>
+</body>
+</html>
